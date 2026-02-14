@@ -29,6 +29,7 @@ class TestCreateMCPServer:
             "get_job_details",
             "search_jobs",
             "get_profile_analytics",
+            "get_notifications",
             "close_session",
         }
         assert expected == tool_names

@@ -44,7 +44,9 @@ async def main():
         result = await mcp.call_tool(
             "get_person_profile", {"linkedin_username": username}
         )
-        raw_text = "\n".join(item.text for item in result.content if hasattr(item, "text"))
+        raw_text = "\n".join(
+            item.text for item in result.content if hasattr(item, "text")
+        )
 
         # Step 2: Summarize with an LLM
         llm = _make_llm()
