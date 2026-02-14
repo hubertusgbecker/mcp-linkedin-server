@@ -13,7 +13,7 @@ This fork extends the original server with two new tool categories and various f
 
 - **Notifications tool** -- Scrapes linkedin.com/notifications/ and returns structured notification data including author names, LinkedIn usernames (resolved from DOM aria-labels), action types, timestamps, and read/unread status.
 - **Profile analytics tool** -- Scrapes linkedin.com/dashboard/ for the logged-in user's own metrics: profile views, post impressions, search appearances, follower count, and weekly sharing activity (posts, comments, reposts, videos, documents, articles).
-- **Username resolution** -- Notification entries include the `linkedin_username` field extracted from profile links in the page DOM, enabling direct linking to author profiles.
+- **Post content tool** -- Navigates to any LinkedIn post URL and extracts the full (non-truncated) text, author name, author headline, posted time, and engagement metrics (reactions, comments, reposts). Works with post URLs returned by the notifications tool.
 
 ## Tools
 
@@ -25,6 +25,7 @@ This fork extends the original server with two new tool categories and various f
 | `search_jobs` | Search for jobs with keywords and location filters | Upstream |
 | `get_job_details` | Detailed information about a specific job posting | Upstream |
 | `get_notifications` | Recent notifications with author LinkedIn usernames, actions, timestamps | Fork |
+| `get_post_content` | Full post text, author, headline, and engagement metrics from any post URL | Fork |
 | `get_profile_analytics` | Dashboard analytics: profile views, impressions, search appearances, followers | Fork |
 | `close_session` | Close browser session and clean up resources | Upstream |
 
@@ -385,6 +386,10 @@ What has Anthropic been posting about recently? https://www.linkedin.com/company
 
 ```
 Show me my latest LinkedIn notifications
+```
+
+```
+Get the full text of this post https://www.linkedin.com/feed/update/urn:li:activity:7428449943742357505/
 ```
 
 ```

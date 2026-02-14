@@ -199,6 +199,45 @@ _PROFILE_LINKS_JS = r"""() => {
 }"""
 
 
+_POST_URLS_JS = r"""() => {
+    const cards = document.querySelectorAll('article.nt-card, div.nt-card');
+    const urls = [];
+    for (const card of cards) {
+        const link = card.querySelector('a.nt-card__headline');
+        if (link) {
+            const href = link.getAttribute('href') || '';
+            const urnMatch = href.match(/highlightedUpdateUrn=urn%3Ali%3Aactivity%3A(\d+)/);
+            if (urnMatch) {
+                urls.push('https://www.linkedin.com/feed/update/urn:li:activity:' + urnMatch[1] + '/');
+            } else {
+                urls.push(null);
+            }
+        } else {
+            urls.push(null);
+        }
+    }
+    return urls;
+}"""
+
+
+async def _extract_post_urls(page: Any) -> List[Optional[str]]:
+    """Extract an ordered list of post URLs from notification card headline links.
+
+    Each notification card has a headline link with a ``highlightedUpdateUrn``
+    query parameter. This function extracts those URNs and converts them to
+    canonical post URLs.
+
+    Returns:
+        A list of post URLs (one per card, in DOM order). Entries are None
+        for cards without a recognisable post link.
+    """
+    try:
+        return await page.evaluate(_POST_URLS_JS)
+    except Exception:
+        logger.debug("Failed to extract post URLs from DOM", exc_info=True)
+        return []
+
+
 async def _extract_profile_username_map(page: Any) -> Dict[str, str]:
     """Extract a mapping of author display names → LinkedIn usernames from DOM.
 
@@ -269,6 +308,9 @@ async def _extract_notifications_from_page(
 
     # Extract author → username map from DOM profile links
     profile_map = await _extract_profile_username_map(page)
+
+    # Extract ordered post URLs from notification cards
+    post_urls = await _extract_post_urls(page)
 
     lines = [line.strip() for line in main_text.split("\n") if line.strip()]
 
@@ -342,11 +384,16 @@ async def _extract_notifications_from_page(
                 # Skip attendee lines, duplicate lines
                 j += 1
 
+            # Map notification index to post URL from card order
+            card_index = len(notifications)
+            post_url = post_urls[card_index] if card_index < len(post_urls) else None
+
             notification: Dict[str, Any] = {
                 "author": parsed["author"],
                 "linkedin_username": _resolve_username(parsed["author"], profile_map),
                 "action": parsed["action"],
                 "text": parsed["text"],
+                "post_url": post_url,
                 "time_ago": time_ago,
                 "minutes_ago": _parse_time_ago(time_ago),
                 "is_unread": unread_flag,
@@ -398,8 +445,11 @@ def register_notification_tools(mcp: FastMCP) -> None:
                 - action (str): What they did: "posted", "reposted", "commented on your post",
                   "liked your post", "hosted this event", etc.
                 - text (str): Preview of the notification content
+                - post_url (str | null): Full LinkedIn URL to the related post or activity.
+                  Can be passed to get_post_content to retrieve the full post text.
+                  null when no post link is found in the notification card.
                 - time_ago (str | null): Relative timestamp as shown on LinkedIn ("5m", "1h", "2d")
-                - minutes_ago (int | null): Numeric equivalent in minutes (5m→5, 1h→60, 2d→2880)
+                - minutes_ago (int | null): Numeric equivalent in minutes (5m->5, 1h->60, 2d->2880)
                 - is_unread (bool): Whether the notification was marked as unread
             - count (int): Number of notifications returned
         """

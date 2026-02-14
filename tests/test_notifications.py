@@ -139,6 +139,7 @@ class TestParseNotificationLine:
 def _make_mock_page(
     main_text: str = "",
     profile_links: list | None = None,
+    post_urls: list | None = None,
     url: str = "https://www.linkedin.com/notifications/",
 ) -> MagicMock:
     page = MagicMock()
@@ -146,9 +147,11 @@ def _make_mock_page(
     page.url = url
 
     async def _mock_evaluate(js_code: str):
-        """Return profile links for the DOM query, innerText otherwise."""
+        """Return profile links, post URLs, or innerText based on JS content."""
         if "/in/" in js_code or "/company/" in js_code:
             return profile_links if profile_links is not None else []
+        if "nt-card__headline" in js_code or "highlightedUpdateUrn" in js_code:
+            return post_urls if post_urls is not None else []
         return main_text
 
     page.evaluate = AsyncMock(side_effect=_mock_evaluate)
@@ -169,6 +172,17 @@ SAMPLE_PROFILE_LINKS = [
     {"name": "Lewis Walker ➲", "username": "lewiswalker"},
     {"name": "NVIDIA AI", "username": "nvidia"},
     {"name": "Ben Torben-Nielsen, PhD, MBA", "username": "bentorbennielsen"},
+]
+
+# Post URLs corresponding to each notification card in order.
+# Extracted from the nt-card__headline href's highlightedUpdateUrn parameter.
+SAMPLE_POST_URLS = [
+    "https://www.linkedin.com/feed/update/urn:li:activity:1000000000000000001/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:1000000000000000002/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:1000000000000000003/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:1000000000000000004/",
+    None,  # event notification has no post URL
+    "https://www.linkedin.com/feed/update/urn:li:activity:1000000000000000006/",
 ]
 
 
@@ -341,6 +355,7 @@ class TestExtractNotificationsFromPage:
         page = _make_mock_page(
             main_text=SAMPLE_NOTIFICATIONS_TEXT,
             profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
         )
         result = await _extract_notifications_from_page(page, limit=10)
 
@@ -352,6 +367,7 @@ class TestExtractNotificationsFromPage:
         page = _make_mock_page(
             main_text=SAMPLE_NOTIFICATIONS_TEXT,
             profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
         )
         result = await _extract_notifications_from_page(page, limit=3)
 
@@ -361,12 +377,14 @@ class TestExtractNotificationsFromPage:
         page = _make_mock_page(
             main_text=SAMPLE_NOTIFICATIONS_TEXT,
             profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
         )
         result = await _extract_notifications_from_page(page, limit=10)
 
         first = result[0]
         assert "author" in first
         assert "linkedin_username" in first
+        assert "post_url" in first
         assert "text" in first
         assert "time_ago" in first
         assert "is_unread" in first
@@ -375,6 +393,7 @@ class TestExtractNotificationsFromPage:
         page = _make_mock_page(
             main_text=SAMPLE_NOTIFICATIONS_TEXT,
             profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
         )
         result = await _extract_notifications_from_page(page, limit=10)
 
@@ -385,11 +404,51 @@ class TestExtractNotificationsFromPage:
         assert "Curiouser" in first["text"]
         assert first["time_ago"] == "5m"
         assert first["is_unread"] is True
+        assert first["post_url"] == SAMPLE_POST_URLS[0]
+
+    async def test_post_url_populated(self):
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
+        )
+        result = await _extract_notifications_from_page(page, limit=10)
+
+        # First notification has a post URL
+        assert result[0]["post_url"] is not None
+        assert "urn:li:activity:" in result[0]["post_url"]
+
+        # All notifications should have the post_url key
+        for n in result:
+            assert "post_url" in n
+
+    async def test_post_url_none_when_missing(self):
+        page = _make_mock_page(
+            main_text=MINIMAL_NOTIFICATIONS_TEXT,
+            profile_links=[{"name": "Ray Dalio", "username": "raydalio"}],
+            post_urls=[],
+        )
+        result = await _extract_notifications_from_page(page, limit=10)
+
+        assert len(result) == 1
+        assert result[0]["post_url"] is None
+
+    async def test_post_url_none_when_no_post_urls_extracted(self):
+        """When post_urls JS returns empty, all post_url fields should be None."""
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
+        result = await _extract_notifications_from_page(page, limit=10)
+
+        for n in result:
+            assert n["post_url"] is None
 
     async def test_unread_vs_read(self):
         page = _make_mock_page(
             main_text=SAMPLE_NOTIFICATIONS_TEXT,
             profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
         )
         result = await _extract_notifications_from_page(page, limit=10)
 
@@ -510,6 +569,7 @@ class TestNotificationsTool:
         mock_page = _make_mock_page(
             main_text=SAMPLE_NOTIFICATIONS_TEXT,
             profile_links=SAMPLE_PROFILE_LINKS,
+            post_urls=SAMPLE_POST_URLS,
         )
         mock_browser = MagicMock()
         mock_browser.page = mock_page

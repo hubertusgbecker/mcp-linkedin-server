@@ -48,7 +48,8 @@ This is a **LinkedIn MCP (Model Context Protocol) Server** that enables AI assis
 - **Person Tools** (`tools/person.py`) - Profile scraping with contacts, interests, experiences, education
 - **Company Tools** (`tools/company.py`) - Company profile and posts extraction
 - **Job Tools** (`tools/job.py`) - Job posting details and search functionality
-- **Notification Tools** (`tools/notifications.py`) - Notification feed with author usernames
+- **Notification Tools** (`tools/notifications.py`) - Notification feed with author usernames and post URLs
+- **Post Content Tools** (`tools/post_content.py`) - Full post text and engagement metrics from any post URL
 
 **Available MCP Tools:**
 
@@ -59,7 +60,8 @@ This is a **LinkedIn MCP (Model Context Protocol) Server** that enables AI assis
 | `get_company_posts` | Get recent posts from company feed with reactions/comments/images |
 | `get_job_details` | Get job posting details including description and benefits |
 | `search_jobs` | Search jobs by keywords and location |
-| `get_notifications` | Get recent notifications with author names, LinkedIn usernames, actions, timestamps |
+| `get_notifications` | Get recent notifications with author names, LinkedIn usernames, actions, timestamps, post URLs |
+| `get_post_content` | Get full post text, author, headline, and engagement metrics from any LinkedIn post URL |
 | `close_session` | Close browser session and clean up resources |
 
 **Authentication Flow:**
