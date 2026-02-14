@@ -38,7 +38,7 @@ class TestPersonTool:
         self, mock_context, patch_tool_deps, monkeypatch
     ):
         mock_person = MagicMock()
-        mock_person.to_dict.return_value = {"full_name": "Test User"}
+        mock_person.to_dict.return_value = {"name": "Test User", "location": "Berlin"}
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=mock_person)
         monkeypatch.setattr(
@@ -53,7 +53,8 @@ class TestPersonTool:
 
         tool_fn = await get_tool_fn(mcp, "get_person_profile")
         result = await tool_fn("test-user", mock_context)
-        assert result["full_name"] == "Test User"
+        assert result["name"] == "Test User"
+        assert result["location"] == "Berlin"
 
     async def test_get_person_profile_error(self, mock_context, monkeypatch):
         from linkedin_mcp_server.exceptions import SessionExpiredError

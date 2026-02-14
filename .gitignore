@@ -202,3 +202,9 @@ cython_debug/
 
 # Portable cookie file (contains session data)
 cookies.json
+
+# Repomix output
+repomix-output.xml
+
+# Script run outputs
+scripts/output/
