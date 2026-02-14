@@ -178,5 +178,5 @@ jobs:
         run: |
           echo "Successfully released v$VERSION!"
           echo "Docker: hubertusgbecker/mcp-linkedin-server:$VERSION"
-          echo "PyPI: https://pypi.org/project/linkedin-scraper-mcp/$VERSION/"
+          echo "PyPI: https://pypi.org/project/mcp-linkedin-server/$VERSION/"
           echo "GitHub: https://github.com/${{ github.repository }}/releases/tag/v$VERSION"

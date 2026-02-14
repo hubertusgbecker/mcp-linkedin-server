@@ -127,7 +127,7 @@ Close the LinkedIn browser session and release all resources. Shuts down the Pat
 **Step 1: Create a session (first time only)**
 
 ```bash
-uvx linkedin-scraper-mcp --get-session
+uvx mcp-linkedin-server --get-session
 ```
 
 This opens a browser for you to log in manually (5 minute timeout for 2FA, captcha, etc.). The browser profile is saved to `~/.linkedin-mcp/profile/`.
@@ -135,10 +135,10 @@ This opens a browser for you to log in manually (5 minute timeout for 2FA, captc
 **Step 2: Run the server**
 
 ```bash
-uvx linkedin-scraper-mcp
+uvx mcp-linkedin-server
 ```
 
-> Sessions may expire over time. If you encounter authentication issues, run `uvx linkedin-scraper-mcp --get-session` again.
+> Sessions may expire over time. If you encounter authentication issues, run `uvx mcp-linkedin-server --get-session` again.
 
 **Client configuration:**
 
@@ -147,7 +147,7 @@ uvx linkedin-scraper-mcp
   "mcpServers": {
     "linkedin": {
       "command": "uvx",
-      "args": ["linkedin-scraper-mcp"]
+      "args": ["mcp-linkedin-server"]
     }
   }
 }
@@ -178,7 +178,7 @@ uvx linkedin-scraper-mcp
 **HTTP mode example:**
 
 ```bash
-uvx linkedin-scraper-mcp --transport streamable-http --host 127.0.0.1 --port 8080 --path /mcp
+uvx mcp-linkedin-server --transport streamable-http --host 127.0.0.1 --port 8080 --path /mcp
 ```
 
 </details>
@@ -199,7 +199,7 @@ uvx linkedin-scraper-mcp --transport streamable-http --host 127.0.0.1 --port 808
 **Login issues:**
 
 - LinkedIn may require a login confirmation in the LinkedIn mobile app for `--get-session`
-- Captcha challenges can occur after frequent logins. Run `uvx linkedin-scraper-mcp --get-session` to solve them manually in the browser.
+- Captcha challenges can occur after frequent logins. Run `uvx mcp-linkedin-server --get-session` to solve them manually in the browser.
 
 **Timeout issues:**
 
@@ -225,7 +225,7 @@ Docker runs headless, so create a browser profile locally first and mount it int
 **Step 1: Create profile using uvx (one-time setup)**
 
 ```bash
-uvx linkedin-scraper-mcp --get-session
+uvx mcp-linkedin-server --get-session
 ```
 
 **Step 2: Configure Claude Desktop with Docker**
@@ -245,7 +245,7 @@ uvx linkedin-scraper-mcp --get-session
 }
 ```
 
-> Sessions may expire over time. If you encounter authentication issues, run `uvx linkedin-scraper-mcp --get-session` again locally.
+> Sessions may expire over time. If you encounter authentication issues, run `uvx mcp-linkedin-server --get-session` again locally.
 
 > Docker containers lack a display server. Create profiles on your host using the uvx setup above and mount them into Docker.
 
@@ -288,7 +288,7 @@ docker run -it --rm \
 **Login issues:**
 
 - Keep only one active LinkedIn session at a time
-- Captcha challenges: run `uvx linkedin-scraper-mcp --get-session` locally to solve them
+- Captcha challenges: run `uvx mcp-linkedin-server --get-session` locally to solve them
 
 **Timeout issues:**
 
@@ -306,9 +306,9 @@ docker run -it --rm \
 
 1. Download the [DXT extension](https://github.com/hubertusgbecker/mcp-linkedin-server/releases/latest)
 2. Double-click to install into Claude Desktop
-3. Create a session: `uvx linkedin-scraper-mcp --get-session`
+3. Create a session: `uvx mcp-linkedin-server --get-session`
 
-> Sessions may expire. Run `uvx linkedin-scraper-mcp --get-session` again if authentication fails.
+> Sessions may expire. Run `uvx mcp-linkedin-server --get-session` again if authentication fails.
 
 <details>
 <summary><b>Troubleshooting</b></summary>
@@ -327,7 +327,7 @@ docker run -it --rm \
 **Login issues:**
 
 - Keep only one active LinkedIn session at a time
-- Captcha challenges: run `uvx linkedin-scraper-mcp --get-session` locally
+- Captcha challenges: run `uvx mcp-linkedin-server --get-session` locally
 
 **Timeout issues:**
 

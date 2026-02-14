@@ -1,5 +1,5 @@
 [project]
-name = "linkedin-scraper-mcp"
+name = "mcp-linkedin-server"
 version = "3.0.4"
 description = "MCP server for LinkedIn profile, company, and job scraping with Claude AI integration. Supports direct profile/company/job URL scraping with secure credential storage."
 readme = "README.md"
@@ -48,6 +48,7 @@ Issues = "https://github.com/hubertusgbecker/mcp-linkedin-server/issues"
 Changelog = "https://github.com/hubertusgbecker/mcp-linkedin-server/releases"
 
 [project.scripts]
+mcp-linkedin-server = "mcp_linkedin_server.cli_main:main"
 linkedin-mcp-server = "mcp_linkedin_server.cli_main:main"
 linkedin-scraper-mcp = "mcp_linkedin_server.cli_main:main"
 
