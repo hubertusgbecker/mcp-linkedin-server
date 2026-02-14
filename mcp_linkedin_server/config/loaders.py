@@ -84,11 +84,13 @@ def load_from_env(config: AppConfig) -> AppConfig:
         config.server.transport_explicitly_set = True
         if transport_env == "stdio":
             config.server.transport = "stdio"
+        elif transport_env == "sse":
+            config.server.transport = "sse"
         elif transport_env == "streamable-http":
             config.server.transport = "streamable-http"
         else:
             raise ConfigurationError(
-                f"Invalid TRANSPORT: '{transport_env}'. Must be 'stdio' or 'streamable-http'."
+                f"Invalid TRANSPORT: '{transport_env}'. Must be 'stdio', 'sse', or 'streamable-http'."
             )
 
     # Persistent browser profile directory
@@ -170,9 +172,9 @@ def load_from_args(config: AppConfig) -> AppConfig:
 
     parser.add_argument(
         "--transport",
-        choices=["stdio", "streamable-http"],
+        choices=["stdio", "sse", "streamable-http"],
         default=None,
-        help="Specify the transport mode (stdio or streamable-http)",
+        help="Specify the transport mode (stdio, sse, or streamable-http)",
     )
 
     parser.add_argument(

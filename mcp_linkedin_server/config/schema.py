@@ -57,7 +57,7 @@ class BrowserConfig:
 class ServerConfig:
     """MCP server configuration."""
 
-    transport: Literal["stdio", "streamable-http"] = "stdio"
+    transport: Literal["stdio", "sse", "streamable-http"] = "stdio"
     transport_explicitly_set: bool = False
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "WARNING"
     get_session: bool = False
@@ -80,7 +80,7 @@ class AppConfig:
     def validate(self) -> None:
         """Validate all configuration values. Call after modifying config."""
         self.browser.validate()
-        if self.server.transport == "streamable-http":
+        if self.server.transport in ("sse", "streamable-http"):
             self._validate_transport_config()
             self._validate_path_format()
         self._validate_port_range()

@@ -38,7 +38,7 @@ from mcp_linkedin_server.setup import run_interactive_setup, run_profile_creatio
 logger = logging.getLogger(__name__)
 
 
-def choose_transport_interactive() -> Literal["stdio", "streamable-http"]:
+def choose_transport_interactive() -> Literal["stdio", "sse", "streamable-http"]:
     """Prompt user for transport mode using inquirer."""
     questions = [
         inquirer.List(
@@ -46,6 +46,7 @@ def choose_transport_interactive() -> Literal["stdio", "streamable-http"]:
             message="Choose mcp transport mode",
             choices=[
                 ("stdio (Default CLI mode)", "stdio"),
+                ("sse (SSE server mode)", "sse"),
                 ("streamable-http (HTTP server mode)", "streamable-http"),
             ],
             default="stdio",
@@ -305,7 +306,7 @@ def main() -> None:
         mcp = create_mcp_server()
 
         print(f"\n🚀 Running LinkedIn MCP server ({transport.upper()} mode)...")
-        if transport == "streamable-http":
+        if transport in ("sse", "streamable-http"):
             print(
                 f"📡 HTTP server at http://{config.server.host}:{config.server.port}{config.server.path}"
             )

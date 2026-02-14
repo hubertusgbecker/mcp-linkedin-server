@@ -6,7 +6,7 @@ services:
       - ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp
     environment:
       - LOG_LEVEL=WARNING
-    command: ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8100", "--path", "/mcp"]
+    command: ["--transport", "sse", "--host", "0.0.0.0", "--port", "8100", "--path", "/sse"]
     ports:
       - "8100:8100"
     restart: unless-stopped
