@@ -1,10 +1,12 @@
 services:
   linkedin-mcp:
-    image: hubertusgbecker/mcp-linkedin-server:3.0.4
+    image: hubertusgbecker/mcp-linkedin-server:latest
     build: .
     volumes:
       - ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp
     environment:
       - LOG_LEVEL=WARNING
-    stdin_open: true
-    tty: true
+    command: ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8000", "--path", "/mcp"]
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
