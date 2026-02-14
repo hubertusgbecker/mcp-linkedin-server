@@ -72,13 +72,21 @@ async def _extract_profile_from_page_text(page, linkedin_url: str) -> Dict[str, 
         # Lines after name: possible pronoun, headline, location
         remaining = lines[name_idx + 1 :]
         for line in remaining[:5]:
-            if line.lower() in ("he/him", "she/her", "they/them", "he/they", "she/they"):
+            if line.lower() in (
+                "he/him",
+                "she/her",
+                "they/them",
+                "he/they",
+                "she/they",
+            ):
                 continue
             if not headline:
                 headline = line
                 continue
             # Location usually contains a comma or "Area"
-            if not location and ("," in line or "Germany" in line or "Area" in line or "United" in line):
+            if not location and (
+                "," in line or "Germany" in line or "Area" in line or "United" in line
+            ):
                 location = line
                 break
 
@@ -113,7 +121,14 @@ async def _extract_profile_from_page_text(page, linkedin_url: str) -> Dict[str, 
         # Experience entries end at next section
         exp_block = []
         for line in exp_lines:
-            if line in ("Education", "Licenses & certifications", "Skills", "Interests", "Recommendations", "Activity"):
+            if line in (
+                "Education",
+                "Licenses & certifications",
+                "Skills",
+                "Interests",
+                "Recommendations",
+                "Activity",
+            ):
                 break
             if line in ("Show all experiences", "Show all"):
                 break
@@ -139,7 +154,13 @@ async def _extract_profile_from_page_text(page, linkedin_url: str) -> Dict[str, 
 
             if i + 1 < len(exp_block):
                 next_line = exp_block[i + 1]
-                if "·" in next_line or "Full-time" in next_line or "Part-time" in next_line or "Contract" in next_line or "Self-employed" in next_line:
+                if (
+                    "·" in next_line
+                    or "Full-time" in next_line
+                    or "Part-time" in next_line
+                    or "Contract" in next_line
+                    or "Self-employed" in next_line
+                ):
                     company = next_line.split("·")[0].strip()
                     i += 1
                 elif not any(c.isdigit() for c in next_line):
@@ -148,28 +169,60 @@ async def _extract_profile_from_page_text(page, linkedin_url: str) -> Dict[str, 
 
             if i + 1 < len(exp_block):
                 next_line = exp_block[i + 1]
-                if any(month in next_line for month in ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Present"]) or re.search(r"\d{4}\s*-", next_line):
+                if any(
+                    month in next_line
+                    for month in [
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "May",
+                        "Jun",
+                        "Jul",
+                        "Aug",
+                        "Sep",
+                        "Oct",
+                        "Nov",
+                        "Dec",
+                        "Present",
+                    ]
+                ) or re.search(r"\d{4}\s*-", next_line):
                     date_range = next_line
                     i += 1
 
             if i + 1 < len(exp_block):
                 next_line = exp_block[i + 1]
-                if "," in next_line and any(geo in next_line for geo in ["Germany", "United", "Remote", "Area", "France", "India", "China", "UK", "Japan"]):
+                if "," in next_line and any(
+                    geo in next_line
+                    for geo in [
+                        "Germany",
+                        "United",
+                        "Remote",
+                        "Area",
+                        "France",
+                        "India",
+                        "China",
+                        "UK",
+                        "Japan",
+                    ]
+                ):
                     loc = next_line
                     i += 1
 
             if position_title and (company or date_range):
                 from_date, to_date, duration = _parse_date_range(date_range)
-                experiences.append({
-                    "position_title": position_title,
-                    "institution_name": company,
-                    "linkedin_url": None,
-                    "from_date": from_date,
-                    "to_date": to_date,
-                    "duration": duration,
-                    "location": loc or None,
-                    "description": desc or None,
-                })
+                experiences.append(
+                    {
+                        "position_title": position_title,
+                        "institution_name": company,
+                        "linkedin_url": None,
+                        "from_date": from_date,
+                        "to_date": to_date,
+                        "duration": duration,
+                        "location": loc or None,
+                        "description": desc or None,
+                    }
+                )
 
             i += 1
 
@@ -185,7 +238,14 @@ async def _extract_profile_from_page_text(page, linkedin_url: str) -> Dict[str, 
         edu_lines = lines[edu_marker + 1 :]
         edu_block = []
         for line in edu_lines:
-            if line in ("Licenses & certifications", "Skills", "Interests", "Experience", "Recommendations", "Activity"):
+            if line in (
+                "Licenses & certifications",
+                "Skills",
+                "Interests",
+                "Experience",
+                "Recommendations",
+                "Activity",
+            ):
                 break
             if line in ("Show all education", "Show all"):
                 break
@@ -221,14 +281,16 @@ async def _extract_profile_from_page_text(page, linkedin_url: str) -> Dict[str, 
                 to_date = parts[1].strip() if len(parts) > 1 else None
 
             if institution:
-                educations.append({
-                    "institution_name": institution,
-                    "degree": degree,
-                    "linkedin_url": None,
-                    "from_date": from_date,
-                    "to_date": to_date,
-                    "description": None,
-                })
+                educations.append(
+                    {
+                        "institution_name": institution,
+                        "degree": degree,
+                        "linkedin_url": None,
+                        "from_date": from_date,
+                        "to_date": to_date,
+                        "description": None,
+                    }
+                )
 
             i += 1
 
@@ -333,9 +395,13 @@ def register_person_tools(mcp: FastMCP) -> None:
                 if not _is_empty_result(result):
                     return result
 
-                logger.info("Scraper returned empty result, falling back to text extraction")
+                logger.info(
+                    "Scraper returned empty result, falling back to text extraction"
+                )
             except Exception as scraper_err:
-                logger.info(f"Scraper failed ({scraper_err}), falling back to text extraction")
+                logger.info(
+                    f"Scraper failed ({scraper_err}), falling back to text extraction"
+                )
 
             # Fallback: extract from page text directly
             await ctx.report_progress(progress=50, total=100)

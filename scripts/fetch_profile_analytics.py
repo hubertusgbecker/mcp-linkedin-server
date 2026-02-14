@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Fetch recent posts from a LinkedIn company page via mcp-use.
+"""Fetch your own LinkedIn profile analytics dashboard via mcp-use.
 
-Usage:  uv run scripts/fetch_company_posts.py [company_name] [limit]
-Defaults: company=bosch, limit=5
+Usage:  uv run scripts/fetch_profile_analytics.py
+
+Returns profile views, post impressions, search appearances,
+followers, and weekly sharing activity.
 """
 
 import asyncio
 import json
 import os
-import sys
 
 os.environ["MCP_USE_ANONYMIZED_TELEMETRY"] = "false"
 
@@ -20,9 +21,6 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 
 async def main():
-    company = sys.argv[1] if len(sys.argv) > 1 else "bosch"
-    limit = int(sys.argv[2]) if len(sys.argv) > 2 else 5
-
     client = MCPClient(
         {
             "mcpServers": {
@@ -42,9 +40,7 @@ async def main():
 
     try:
         session = await client.create_session("linkedin")
-        result = await session.call_tool(
-            "get_company_posts", {"company_name": company, "limit": limit}
-        )
+        result = await session.call_tool("get_profile_analytics", {})
         print("\n--- RESULT ---")
         for item in result.content:
             if hasattr(item, "text"):

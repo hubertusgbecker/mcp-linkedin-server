@@ -22,18 +22,28 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 async def main():
     company = sys.argv[1] if len(sys.argv) > 1 else "bosch"
 
-    client = MCPClient({
-        "mcpServers": {
-            "linkedin": {
-                "command": "uv",
-                "args": ["run", "--directory", PROJECT_ROOT, "-m", "linkedin_mcp_server"],
+    client = MCPClient(
+        {
+            "mcpServers": {
+                "linkedin": {
+                    "command": "uv",
+                    "args": [
+                        "run",
+                        "--directory",
+                        PROJECT_ROOT,
+                        "-m",
+                        "linkedin_mcp_server",
+                    ],
+                }
             }
         }
-    })
+    )
 
     try:
         session = await client.create_session("linkedin")
-        result = await session.call_tool("get_company_profile", {"company_name": company})
+        result = await session.call_tool(
+            "get_company_profile", {"company_name": company}
+        )
         print("\n--- RESULT ---")
         for item in result.content:
             if hasattr(item, "text"):

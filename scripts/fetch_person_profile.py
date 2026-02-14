@@ -21,14 +21,22 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 
 def _make_client() -> MCPClient:
-    return MCPClient({
-        "mcpServers": {
-            "linkedin": {
-                "command": "uv",
-                "args": ["run", "--directory", PROJECT_ROOT, "-m", "linkedin_mcp_server"],
+    return MCPClient(
+        {
+            "mcpServers": {
+                "linkedin": {
+                    "command": "uv",
+                    "args": [
+                        "run",
+                        "--directory",
+                        PROJECT_ROOT,
+                        "-m",
+                        "linkedin_mcp_server",
+                    ],
+                }
             }
         }
-    })
+    )
 
 
 def _make_llm() -> ChatOpenAI:

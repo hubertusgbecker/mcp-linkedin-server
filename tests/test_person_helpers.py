@@ -7,7 +7,6 @@ Covers:
 - get_person_profile fallback flow: scraper → text extraction
 """
 
-import asyncio
 from typing import Any, Callable, Coroutine
 from unittest.mock import AsyncMock, MagicMock
 

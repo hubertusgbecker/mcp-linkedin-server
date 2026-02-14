@@ -22,14 +22,22 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 async def main():
     job_id = sys.argv[1] if len(sys.argv) > 1 else "4252026496"
 
-    client = MCPClient({
-        "mcpServers": {
-            "linkedin": {
-                "command": "uv",
-                "args": ["run", "--directory", PROJECT_ROOT, "-m", "linkedin_mcp_server"],
+    client = MCPClient(
+        {
+            "mcpServers": {
+                "linkedin": {
+                    "command": "uv",
+                    "args": [
+                        "run",
+                        "--directory",
+                        PROJECT_ROOT,
+                        "-m",
+                        "linkedin_mcp_server",
+                    ],
+                }
             }
         }
-    })
+    )
 
     try:
         session = await client.create_session("linkedin")

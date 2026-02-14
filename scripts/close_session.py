@@ -18,14 +18,22 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 
 async def main():
-    client = MCPClient({
-        "mcpServers": {
-            "linkedin": {
-                "command": "uv",
-                "args": ["run", "--directory", PROJECT_ROOT, "-m", "linkedin_mcp_server"],
+    client = MCPClient(
+        {
+            "mcpServers": {
+                "linkedin": {
+                    "command": "uv",
+                    "args": [
+                        "run",
+                        "--directory",
+                        PROJECT_ROOT,
+                        "-m",
+                        "linkedin_mcp_server",
+                    ],
+                }
             }
         }
-    })
+    )
 
     try:
         session = await client.create_session("linkedin")

@@ -2,7 +2,6 @@
 
 from unittest.mock import AsyncMock, patch
 
-import pytest
 
 from linkedin_mcp_server.server import create_mcp_server
 
@@ -17,7 +16,11 @@ class TestCreateMCPServer:
         mcp = create_mcp_server()
         tools = await mcp.get_tools()
         # get_tools() returns a dict keyed by tool name
-        tool_names = set(tools.keys()) if isinstance(tools, dict) else {t if isinstance(t, str) else t.name for t in tools}
+        tool_names = (
+            set(tools.keys())
+            if isinstance(tools, dict)
+            else {t if isinstance(t, str) else t.name for t in tools}
+        )
 
         expected = {
             "get_person_profile",
@@ -25,6 +28,7 @@ class TestCreateMCPServer:
             "get_company_posts",
             "get_job_details",
             "search_jobs",
+            "get_profile_analytics",
             "close_session",
         }
         assert expected == tool_names

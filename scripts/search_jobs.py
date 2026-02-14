@@ -24,14 +24,22 @@ async def main():
     location = sys.argv[2] if len(sys.argv) > 2 else "Germany"
     limit = int(sys.argv[3]) if len(sys.argv) > 3 else 10
 
-    client = MCPClient({
-        "mcpServers": {
-            "linkedin": {
-                "command": "uv",
-                "args": ["run", "--directory", PROJECT_ROOT, "-m", "linkedin_mcp_server"],
+    client = MCPClient(
+        {
+            "mcpServers": {
+                "linkedin": {
+                    "command": "uv",
+                    "args": [
+                        "run",
+                        "--directory",
+                        PROJECT_ROOT,
+                        "-m",
+                        "linkedin_mcp_server",
+                    ],
+                }
             }
         }
-    })
+    )
 
     try:
         session = await client.create_session("linkedin")
