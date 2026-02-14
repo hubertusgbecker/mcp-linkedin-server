@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /
 
 # Set browser install location (Patchright reads PLAYWRIGHT_BROWSERS_PATH internally)
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/patchright
+ENV PYTHONUNBUFFERED=1
 # Install dependencies, system libs for Chromium, and patched Chromium binary
 RUN uv sync --frozen && \
     uv run patchright install-deps chromium && \
