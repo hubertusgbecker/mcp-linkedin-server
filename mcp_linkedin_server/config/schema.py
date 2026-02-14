@@ -1,5 +1,5 @@
 """
-Configuration schema definitions for LinkedIn MCP Server.
+Configuration schema definitions for MCP LinkedIn Server.
 
 Defines the dataclass schemas that represent the application's configuration
 structure with type-safe configuration objects and default values.

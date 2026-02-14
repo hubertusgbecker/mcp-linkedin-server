@@ -1,5 +1,5 @@
 """
-Centralized error handling for LinkedIn MCP Server with structured responses.
+Centralized error handling for MCP LinkedIn Server with structured responses.
 
 Provides DRY approach to error handling across all tools with consistent MCP response
 format, specific LinkedIn error categorization, and proper logging integration.
@@ -114,7 +114,7 @@ def convert_exception_to_response(
 
     elif isinstance(exception, LinkedInScraperException):
         return {
-            "error": "linkedin_scraper_error",
+            "error": "mcp_linkedin_server_error",
             "message": str(exception),
         }
 

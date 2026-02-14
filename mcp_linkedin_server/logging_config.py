@@ -1,6 +1,6 @@
 # mcp_linkedin_server/logging_config.py
 """
-Logging configuration for LinkedIn MCP Server with format options.
+Logging configuration for MCP LinkedIn Server with format options.
 
 Provides JSON and compact logging formats for different deployment scenarios.
 JSON format for production MCP integration, compact format for development.
@@ -80,7 +80,7 @@ class CompactFormatter(logging.Formatter):
 
 
 def configure_logging(log_level: str = "WARNING", json_format: bool = False) -> None:
-    """Configure logging for the LinkedIn MCP Server.
+    """Configure logging for the MCP LinkedIn Server.
 
     Args:
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR)

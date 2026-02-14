@@ -1,19 +1,18 @@
 {
   "dxt_version": "0.1",
-  "name": "linkedin-mcp-server",
-  "display_name": "LinkedIn MCP Server",
+  "name": "mcp-linkedin-server",
+  "display_name": "MCP LinkedIn Server",
   "version": "3.0.4",
-  "description": "Connect Claude to LinkedIn for profiles, companies, and job details",
-  "long_description": "# LinkedIn MCP Server\n\nConnect Claude to your LinkedIn account. Access profiles, companies, and job postings through a Docker container on your machine.\n\n## Features\n- **Profile Access**: Get detailed LinkedIn profile information including work history, education, and skills\n- **Company Profiles**: Extract comprehensive company information and details\n- **Job Details**: Retrieve job posting information from LinkedIn URLs\n- **Job Search**: Search for jobs with keywords and location filters\n\n## First-Time Setup\n\n### 1. Pre-pull Docker Image (Required)\nRun this command first to avoid connection timeouts:\n```\ndocker pull stickerdaniel/linkedin-mcp-server:3.0.4",
+  "description": "Connect Claude to LinkedIn for profiles, companies, jobs, notifications, post content, and analytics",
+  "long_description": "# MCP LinkedIn Server\n\nConnect Claude to your LinkedIn account. Access profiles, companies, jobs, notifications, full post content, and profile analytics through a Docker container on your machine.\n\n## Features\n- **Profile Access**: Get detailed LinkedIn profile information including work history, education, and skills\n- **Company Profiles**: Extract comprehensive company data including recent posts\n- **Job Details**: Retrieve job posting information and search jobs\n- **Notifications**: Get recent notifications with author usernames and post URLs\n- **Post Content**: Extract full (non-truncated) text from any LinkedIn post\n- **Profile Analytics**: Monitor profile views, impressions, search appearances, followers\n\n## First-Time Setup\n\n### 1. Pre-pull Docker Image (Required)\nRun this command first to avoid connection timeouts:\n```\ndocker pull hubertusgbecker/mcp-linkedin-server:3.0.4",
   "author": {
-    "name": "Daniel Sticker",
-    "email": "daniel@sticker.name",
-    "url": "https://daniel.sticker.name/"
+    "name": "Dr. Hubertus Becker",
+    "url": "https://github.com/hubertusgbecker"
   },
-  "homepage": "https://github.com/stickerdaniel/linkedin-mcp-server",
-  "documentation": "https://github.com/stickerdaniel/linkedin-mcp-server#readme",
-  "support": "https://github.com/stickerdaniel/linkedin-mcp-server/issues",
-  "license": "MIT",
+  "homepage": "https://github.com/hubertusgbecker/mcp-linkedin-server",
+  "documentation": "https://github.com/hubertusgbecker/mcp-linkedin-server#readme",
+  "support": "https://github.com/hubertusgbecker/mcp-linkedin-server/issues",
+  "license": "Apache-2.0",
   "keywords": ["linkedin", "scraping", "mcp", "profiles", "companies", "jobs"],
   "icon": "assets/icons/linkedin.svg",
   "screenshots": ["assets/screenshots/screenshot.png"],
@@ -26,7 +25,7 @@
         "run", "--rm", "-i",
         "-v", "${HOME}/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
         "-e", "LOG_LEVEL=DEBUG",
-        "stickerdaniel/linkedin-mcp-server:3.0.4"
+        "hubertusgbecker/mcp-linkedin-server:3.0.4"
       ]
     }
   },

@@ -1,6 +1,6 @@
 # src/mcp_linkedin_server/__init__.py
 """
-LinkedIn MCP Server package.
+MCP LinkedIn Server package.
 
 A Model Context Protocol (MCP) server that provides LinkedIn integration capabilities
 for AI assistants. This package enables secure LinkedIn profile, company, and job

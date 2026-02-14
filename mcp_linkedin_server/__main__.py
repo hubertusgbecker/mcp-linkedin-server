@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Entry point for linkedin-mcp-server command."""
+"""Entry point for mcp-linkedin-server command."""
 
 from mcp_linkedin_server.cli_main import main
 

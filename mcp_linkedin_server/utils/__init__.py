@@ -1,1 +1,1 @@
-"""Utility functions for LinkedIn MCP Server."""
+"""Utility functions for MCP LinkedIn Server."""

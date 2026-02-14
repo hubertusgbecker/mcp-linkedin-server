@@ -1,33 +1,116 @@
-# MCP LinkedIn Server (Fork)
+# MCP LinkedIn Server
 
-Fork of [stickerdaniel/linkedin-mcp-server](https://github.com/stickerdaniel/linkedin-mcp-server) with significant additions including notifications with author username resolution, profile analytics dashboard scraping, and improved error handling.
+An improved fork of [stickerdaniel/linkedin-mcp-server](https://github.com/stickerdaniel/linkedin-mcp-server). This fork adds **4 new tools**, totaling **10 MCP tools** for comprehensive LinkedIn automation — from profile research and job discovery to real-time notifications, full post extraction, and profile analytics.
 
 <p align="left">
-  <a href="https://github.com/stickerdaniel/linkedin-mcp-server" target="_blank"><img src="https://img.shields.io/badge/upstream-stickerdaniel%2Flinkedin--mcp--server-blue" alt="Upstream"></a>
+  <a href="https://github.com/hubertusgbecker/mcp-linkedin-server" target="_blank"><img src="https://img.shields.io/badge/repo-hubertusgbecker%2Fmcp--linkedin--server-blue" alt="GitHub"></a>
   <a href="https://github.com/hubertusgbecker/mcp-linkedin-server/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/badge/License-Apache%202.0-brightgreen?labelColor=32383f" alt="License"></a>
 </p>
 
-## What Changed in This Fork
+## What's Improved Over the Original
 
-This fork extends the original server with two new tool categories and various fixes:
-
-- **Notifications tool** -- Scrapes linkedin.com/notifications/ and returns structured notification data including author names, LinkedIn usernames (resolved from DOM aria-labels), action types, timestamps, and read/unread status.
-- **Profile analytics tool** -- Scrapes linkedin.com/dashboard/ for the logged-in user's own metrics: profile views, post impressions, search appearances, follower count, and weekly sharing activity (posts, comments, reposts, videos, documents, articles).
-- **Post content tool** -- Navigates to any LinkedIn post URL and extracts the full (non-truncated) text, author name, author headline, posted time, and engagement metrics (reactions, comments, reposts). Works with post URLs returned by the notifications tool.
+| Area | Details |
+|------|---------|
+| **+4 New tools** | `get_notifications`, `get_post_content`, `get_company_posts`, `get_profile_analytics` — none of these exist in the upstream server |
+| **Author resolution** | Notifications resolve each author's LinkedIn username from DOM aria-labels, so you can immediately look up their profile |
+| **Post URL linking** | Every notification includes a direct `post_url` you can pass straight into `get_post_content` for the full text |
+| **Full post extraction** | Retrieve the complete, non-truncated text of any LinkedIn post along with engagement metrics |
+| **Profile analytics** | Monitor your own LinkedIn performance — profile views, post impressions, search appearances, follower count |
+| **Improved error handling** | Structured error responses with rate-limit detection, captcha handling, and authentication validation |
 
 ## Tools
 
-| Tool | Description | Origin |
-|------|-------------|--------|
-| `get_person_profile` | Detailed profile info including work history, education, contacts, interests | Upstream |
-| `get_company_profile` | Company information including employees, affiliated companies | Upstream |
-| `get_company_posts` | Recent posts from a company LinkedIn feed | Upstream |
-| `search_jobs` | Search for jobs with keywords and location filters | Upstream |
-| `get_job_details` | Detailed information about a specific job posting | Upstream |
-| `get_notifications` | Recent notifications with author LinkedIn usernames, actions, timestamps | Fork |
-| `get_post_content` | Full post text, author, linkedin_username, headline, and engagement metrics from any post URL | Fork |
-| `get_profile_analytics` | Dashboard analytics: profile views, impressions, search appearances, followers | Fork |
-| `close_session` | Close browser session and clean up resources | Upstream |
+### People & Companies (upstream)
+
+#### `get_person_profile`
+
+Get a person's full LinkedIn profile by their username. Scrapes the public-facing profile page and returns structured data covering their entire professional background.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `linkedin_username` | `str` | URL slug after `linkedin.com/in/` (e.g. `"williamhgates"`, `"satyanadella"`) |
+
+**Returns:** name, location, about section, open-to-work status, current company & job title, full work history (position, company, dates, duration, description), education history, interests (companies, groups, influencers), accomplishments (certifications, publications), and contact details (email, phone, website, Twitter, birthday).
+
+#### `get_company_profile`
+
+Get a company's full LinkedIn profile by its URL slug. Scrapes the "About" page for organizational details, employee highlights, and affiliated entities.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_name` | `str` | URL slug after `linkedin.com/company/` (e.g. `"anthropic"`, `"docker"`) |
+
+**Returns:** company name, about section, website, phone, headquarters, founded year, industry, company type, size, specialties, headcount, showcase pages, affiliated companies, and featured employees with their LinkedIn URLs.
+
+#### `get_company_posts`
+
+Get recent posts from a company's LinkedIn feed with engagement metrics and media.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_name` | `str` | URL slug after `linkedin.com/company/` (e.g. `"anthropic"`) |
+
+**Returns:** list of posts with text content, posted time, reactions count, comments count, reposts count, and image URLs.
+
+### Jobs (upstream)
+
+#### `search_jobs`
+
+Search for job postings on LinkedIn by keywords and optional location. Returns a list of job URLs — pass each job ID to `get_job_details` for full information.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `keywords` | `str` | Search query (e.g. `"software engineer"`, `"data scientist python"`) |
+| `location` | `str \| null` | Geographic filter (e.g. `"Germany"`, `"Remote"`). Optional. |
+| `limit` | `int` | Max results to return (default: 25) |
+
+**Returns:** list of LinkedIn job posting URLs and total count.
+
+#### `get_job_details`
+
+Get full details of a specific LinkedIn job posting including the complete description, requirements, and benefits.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `job_id` | `str` | Numeric job ID from `linkedin.com/jobs/view/{job_id}/` |
+
+**Returns:** title, company, location, posted date, applicant count, full job description, seniority level, employment type, job function, industries, direct LinkedIn URL, and benefits.
+
+### Notifications & Posts (fork)
+
+#### `get_notifications`
+
+Get recent notifications from the logged-in user's LinkedIn feed. Resolves each author's LinkedIn username from the page DOM so you can immediately look up their profile. Each notification includes a `post_url` that can be passed directly to `get_post_content`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | `int` | Max notifications to return (default: 10, max: 50) |
+
+**Returns:** list of notifications, each with: author name, `linkedin_username` (resolved from DOM), action type (`"posted"`, `"reposted"`, `"commented on your post"`, etc.), preview text, `post_url` (passable to `get_post_content`), relative timestamp, numeric minutes-ago, and read/unread status.
+
+#### `get_post_content`
+
+Get the full content of any LinkedIn post by URL. Navigates to the post page and extracts the complete (non-truncated) text, author information, and engagement metrics. Use after `get_notifications` to read the full text of truncated notification previews.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `post_url` | `str` | Full LinkedIn post URL (activity URN or slug format) |
+
+**Returns:** full post body text, author name, `linkedin_username` (extracted from author profile link), author headline, relative timestamp, reactions count, comments count, and reposts count.
+
+### Analytics (fork)
+
+#### `get_profile_analytics`
+
+Get analytics from the logged-in user's own LinkedIn dashboard. No parameters needed — always returns data for the currently authenticated account.
+
+**Returns:** profile views (past 90 days), post impressions (past 7 days), search appearances (previous week), follower count, weekly posts count, and weekly comments count.
+
+### Session Management
+
+#### `close_session`
+
+Close the LinkedIn browser session and release all resources. Shuts down the Patchright browser, saves cookies for future sessions, and frees memory. The browser will re-launch automatically on the next tool call.
 
 > **Warning:** The browser profile at `~/.linkedin-mcp/profile/` contains sensitive authentication data. Keep it secure and do not share it.
 
@@ -262,7 +345,7 @@ docker run -it --rm \
 ```bash
 # Clone this fork
 git clone https://github.com/hubertusgbecker/mcp-linkedin-server
-cd linkedin-mcp-server
+cd mcp-linkedin-server
 
 # Install dependencies
 uv sync
@@ -318,7 +401,7 @@ uv run -m mcp_linkedin_server --transport streamable-http --host 127.0.0.1 --por
   "mcpServers": {
     "linkedin": {
       "command": "uv",
-      "args": ["--directory", "/path/to/linkedin-mcp-server", "run", "-m", "mcp_linkedin_server"]
+      "args": ["--directory", "/path/to/mcp-linkedin-server", "run", "-m", "mcp_linkedin_server"]
     }
   }
 }

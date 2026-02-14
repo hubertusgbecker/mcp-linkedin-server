@@ -25,15 +25,15 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastMCP) -> AsyncIterator[None]:
     """Manage server lifecycle - cleanup browser on shutdown."""
-    logger.info("LinkedIn MCP Server starting...")
+    logger.info("MCP LinkedIn Server starting...")
     yield
-    logger.info("LinkedIn MCP Server shutting down...")
+    logger.info("MCP LinkedIn Server shutting down...")
     await close_browser()
 
 
 def create_mcp_server() -> FastMCP:
     """Create and configure the MCP server with all LinkedIn tools."""
-    mcp = FastMCP("linkedin_scraper", lifespan=lifespan)
+    mcp = FastMCP("mcp_linkedin_server", lifespan=lifespan)
 
     # Register all tools
     register_person_tools(mcp)

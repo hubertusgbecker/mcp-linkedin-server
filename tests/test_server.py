@@ -10,7 +10,7 @@ class TestCreateMCPServer:
     def test_creates_server_instance(self):
         mcp = create_mcp_server()
         assert mcp is not None
-        assert mcp.name == "linkedin_scraper"
+        assert mcp.name == "mcp_linkedin_server"
 
     async def test_all_tools_registered(self):
         mcp = create_mcp_server()

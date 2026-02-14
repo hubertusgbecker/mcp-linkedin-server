@@ -1,5 +1,5 @@
 """
-Configuration loading and argument parsing for LinkedIn MCP Server.
+Configuration loading and argument parsing for MCP LinkedIn Server.
 
 Loads settings from CLI arguments and environment variables.
 """
@@ -153,7 +153,7 @@ def load_from_env(config: AppConfig) -> AppConfig:
 def load_from_args(config: AppConfig) -> AppConfig:
     """Load configuration from command line arguments."""
     parser = argparse.ArgumentParser(
-        description="LinkedIn MCP Server - A Model Context Protocol server for LinkedIn integration"
+        description="MCP LinkedIn Server - A Model Context Protocol server for LinkedIn integration"
     )
 
     parser.add_argument(

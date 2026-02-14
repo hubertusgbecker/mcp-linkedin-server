@@ -1,5 +1,5 @@
 """
-Configuration system for LinkedIn MCP Server.
+Configuration system for MCP LinkedIn Server.
 
 Provides a singleton pattern for configuration management with
 loading from CLI arguments and environment variables.

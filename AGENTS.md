@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Install browser: `uv run patchright install chromium`
 - Run server locally: `uv run -m mcp_linkedin_server --no-headless`
 - Run via uvx (PyPI): `uvx linkedin-scraper-mcp`
-- Run in Docker: `docker run -it --rm -v ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp stickerdaniel/linkedin-mcp-server:latest`
+- Run in Docker: `docker run -it --rm -v ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp hubertusgbecker/mcp-linkedin-server:latest`
 
 **Code Quality:**
 
@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Docker Commands:**
 
-- Build: `docker build -t linkedin-mcp-server .`
+- Build: `docker build -t mcp-linkedin-server .`
 - Get session: Use uvx locally first: `uvx linkedin-scraper-mcp --get-session`
 
 ## Architecture Overview

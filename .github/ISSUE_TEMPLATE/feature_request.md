@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for the LinkedIn MCP server
+about: Suggest an idea for the MCP LinkedIn Server
 title: '[FEATURE] '
 labels: ['enhancement']
 assignees: ''

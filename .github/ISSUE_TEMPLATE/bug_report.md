@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve the LinkedIn MCP server
+about: Create a report to help us improve the MCP LinkedIn Server
 title: '[BUG] '
 labels: ['bug']
 assignees: ''
@@ -17,8 +17,12 @@ assignees: ''
 - [ ] During tool call (specify which tool):
   - [ ] get_person_profile
   - [ ] get_company_profile
+  - [ ] get_company_posts
   - [ ] get_job_details
   - [ ] search_jobs
+  - [ ] get_notifications
+  - [ ] get_post_content
+  - [ ] get_profile_analytics
   - [ ] close_session
 
 ## MCP Client Configuration
@@ -35,7 +39,7 @@ assignees: ''
 ```
 
 ## MCP Client Logs
-**Claude Desktop Logs** (`/Users/[username]/Library/Logs/Claude/mcp-server-LinkedIn MCP Server.log`):
+**Claude Desktop Logs** (`/Users/[username]/Library/Logs/Claude/mcp-server-MCP LinkedIn Server.log`):
 ```
 Paste relevant log entries here
 ```

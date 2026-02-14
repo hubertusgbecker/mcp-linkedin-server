@@ -361,7 +361,7 @@ def register_person_tools(mcp: FastMCP) -> None:
 
         Args:
             linkedin_username: The URL slug that appears after linkedin.com/in/.
-                Examples: "stickerdaniel", "williamhgates", "satyanadella".
+                Examples: "hubertusgbecker", "williamhgates", "satyanadella".
                 Do NOT pass full URLs — only the username part.
 
         Returns:

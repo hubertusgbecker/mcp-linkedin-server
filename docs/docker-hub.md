@@ -1,14 +1,15 @@
-# LinkedIn MCP Server
+# MCP LinkedIn Server
 
-A Model Context Protocol (MCP) server that connects AI assistants to LinkedIn. Access profiles, companies, and job postings through a Docker container.
+A Model Context Protocol (MCP) server that connects AI assistants to LinkedIn. Access profiles, companies, jobs, notifications, full post content, and profile analytics through a Docker container.
 
 ## Features
 
 - **Profile Access**: Get detailed LinkedIn profile information
-- **Company Profiles**: Extract comprehensive company data
-- **Job Details**: Retrieve job posting information
-- **Job Search**: Search for jobs with keywords and location filters
-- **Company Posts**: Get recent posts from a company's LinkedIn feed
+- **Company Profiles**: Extract comprehensive company data including posts
+- **Job Details**: Retrieve job posting information and search jobs
+- **Notifications**: Get recent notifications with author usernames and post URLs
+- **Post Content**: Extract full (non-truncated) text from any LinkedIn post
+- **Profile Analytics**: Monitor profile views, impressions, search appearances, followers
 
 ## Quick Start
 
@@ -30,7 +31,7 @@ uvx linkedin-scraper-mcp --get-session
       "args": [
         "run", "--rm", "-i",
         "-v", "~/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
-        "stickerdaniel/linkedin-mcp-server:latest"
+        "hubertusgbecker/mcp-linkedin-server:latest"
       ]
     }
   }
@@ -66,7 +67,7 @@ uvx linkedin-scraper-mcp --get-session
         "run", "-i", "--rm",
         "-v", "~/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
         "-e", "TIMEOUT=10000",
-        "stickerdaniel/linkedin-mcp-server"
+        "hubertusgbecker/mcp-linkedin-server"
       ]
     }
   }
@@ -75,5 +76,5 @@ uvx linkedin-scraper-mcp --get-session
 
 ## Repository
 
-- **Source**: <https://github.com/stickerdaniel/linkedin-mcp-server>
+- **Source**: <https://github.com/hubertusgbecker/mcp-linkedin-server>
 - **License**: Apache 2.0
