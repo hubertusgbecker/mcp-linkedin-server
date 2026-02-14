@@ -40,15 +40,32 @@ def register_job_tools(mcp: FastMCP) -> None:
     )
     async def get_job_details(job_id: str, ctx: Context) -> Dict[str, Any]:
         """
-        Get job details for a specific job posting on LinkedIn.
+        Get full details of a specific LinkedIn job posting.
+
+        Scrapes a single job listing page for its complete description, requirements,
+        and metadata. Use search_jobs first to find job IDs, then call this for details.
 
         Args:
-            job_id: LinkedIn job ID (e.g., "4252026496", "3856789012")
-            ctx: FastMCP context for progress reporting
+            job_id: The numeric LinkedIn job ID. This appears in job URLs as
+                linkedin.com/jobs/view/{job_id}/.
+                Examples: "4252026496", "3856789012".
+                You can obtain job IDs from the search_jobs tool.
 
         Returns:
-            Structured job data including title, company, location,
-            posting date, and job description.
+            Structured job data with the following fields:
+            - title (str): Job title (e.g. "Senior Software Engineer")
+            - company (str): Hiring company name
+            - location (str | null): Job location (e.g. "Stuttgart, Germany (On-site)")
+            - posted_date (str | null): When the job was posted (e.g. "2 weeks ago")
+            - applicants (str | null): Number of applicants (e.g. "Over 100 applicants")
+            - job_description (str): Full job description text including responsibilities,
+              requirements, and qualifications
+            - seniority_level (str | null): e.g. "Mid-Senior level"
+            - employment_type (str | null): e.g. "Full-time", "Contract"
+            - job_function (str | null): e.g. "Engineering", "Information Technology"
+            - industries (str | null): e.g. "Software Development"
+            - linkedin_url (str): Direct link to the job posting
+            - benefits (list): Listed job benefits if available
         """
         try:
             # Validate session before scraping
@@ -83,17 +100,29 @@ def register_job_tools(mcp: FastMCP) -> None:
         limit: int = 25,
     ) -> Dict[str, Any]:
         """
-        Search for jobs on LinkedIn.
+        Search for job postings on LinkedIn by keywords and location.
+
+        Returns a list of job URLs matching the search criteria. This is a
+        discovery tool — it returns URLs only. To get full job details
+        (title, description, requirements), pass each URL's job ID to
+        the get_job_details tool.
 
         Args:
-            keywords: Search keywords (e.g., "software engineer", "data scientist")
-            ctx: FastMCP context for progress reporting
-            location: Optional location filter (e.g., "San Francisco", "Remote")
-            limit: Maximum number of job URLs to return (default: 25)
+            keywords: Search query for job titles or skills.
+                Examples: "software engineer", "data scientist python",
+                "product manager AI".
+            location: Optional geographic filter. Can be a city, country, or "Remote".
+                Examples: "San Francisco", "Germany", "Remote".
+                If omitted, searches globally.
+            limit: Maximum number of job URLs to return. Default: 25.
+                LinkedIn may return fewer results depending on the query.
 
         Returns:
-            Dict with job_urls list and count. Use get_job_details to get
-            full details for specific jobs.
+            Dict with:
+            - job_urls (list[str]): LinkedIn job posting URLs. Extract the numeric
+              job ID from each URL (the number after /jobs/view/) to use with
+              get_job_details.
+            - count (int): Number of job URLs returned.
         """
         try:
             # Validate session before scraping

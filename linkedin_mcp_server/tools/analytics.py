@@ -146,17 +146,26 @@ def register_analytics_tools(mcp: FastMCP) -> None:
         """
         Get analytics from the logged-in user's LinkedIn dashboard.
 
-        This tool only works for the profile that is currently authenticated.
-        It navigates to linkedin.com/dashboard/ and extracts the analytics metrics.
+        Scrapes linkedin.com/dashboard/ for the authenticated user's own analytics.
+        No parameters needed — this always returns data for the currently logged-in account.
+        Use this to monitor profile performance, audience growth, and content engagement.
 
         Returns:
-            Structured analytics data:
-            - profile_views: Number of profile views (recent period)
-            - post_impressions: Number of post impressions (past 7 days)
-            - search_appearances: How often the profile appeared in search
-            - followers: Total follower count
-            - weekly_posts: Number of posts made this week
-            - weekly_comments: Number of comments made this week
+            Structured analytics data with the following fields:
+            - profile_views (int | null): Total number of unique LinkedIn members
+              who visited the authenticated user's profile. Covers the past 90 days.
+            - post_impressions (int | null): The number of times the user's posts
+              were displayed on screen across LinkedIn feeds. Covers the past 7 days.
+            - search_appearances (int | null): How many times the user's profile
+              appeared in LinkedIn search results. Covers the previous week.
+            - followers (int | null): Total number of people currently following
+              the user, including both connections and non-connection followers.
+            - weekly_posts (int | null): Number of posts the user published in
+              the current week (Mon–Sun). Part of LinkedIn's weekly sharing tracker.
+            - weekly_comments (int | null): Number of comments the user made in
+              the current week (Mon–Sun). Part of LinkedIn's weekly sharing tracker.
+
+            Any field may be null if the metric is unavailable or the page layout changed.
         """
         try:
             await ensure_authenticated()

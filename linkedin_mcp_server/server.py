@@ -42,7 +42,19 @@ def create_mcp_server() -> FastMCP:
     # Register session management tool
     @mcp.tool()
     async def close_session() -> Dict[str, Any]:
-        """Close the current browser session and clean up resources."""
+        """
+        Close the LinkedIn browser session and release all resources.
+
+        Shuts down the Patchright browser instance, saves cookies for future
+        sessions, and frees memory. Call this when you are done with all
+        LinkedIn operations. The browser will be automatically re-launched
+        on the next tool call if needed.
+
+        Returns:
+            Dict with:
+            - status (str): "success" or "error"
+            - message (str): Human-readable confirmation or error detail
+        """
         try:
             await close_browser()
             return {

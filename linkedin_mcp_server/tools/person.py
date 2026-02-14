@@ -354,24 +354,46 @@ def register_person_tools(mcp: FastMCP) -> None:
         linkedin_username: str, ctx: Context
     ) -> Dict[str, Any]:
         """
-        Get a specific person's LinkedIn profile.
+        Get a person's full LinkedIn profile by their username.
+
+        Scrapes the public-facing profile page of any LinkedIn member. Use this to
+        retrieve professional background, contact details, and career history.
 
         Args:
-            linkedin_username: LinkedIn username (e.g., "stickerdaniel", "williamhgates")
-            ctx: FastMCP context for progress reporting
+            linkedin_username: The URL slug that appears after linkedin.com/in/.
+                Examples: "stickerdaniel", "williamhgates", "satyanadella".
+                Do NOT pass full URLs — only the username part.
 
         Returns:
-            Structured data from the person's profile including:
-            - linkedin_url, name, location, about, open_to_work
-            - experiences: List of work history (position_title, institution_name,
-              linkedin_url, from_date, to_date, duration, location, description)
-            - educations: List of education (institution_name, degree, linkedin_url,
-              from_date, to_date, description)
-            - interests: List of interests with category (company, group, school,
-              newsletter, influencer) and linkedin_url
-            - accomplishments: List of accomplishments (category, title)
-            - contacts: List of contact info (type: email/phone/website/linkedin/
-              twitter/birthday/address, value, label)
+            Structured profile data with the following fields:
+            - linkedin_url (str): Full profile URL (e.g. https://www.linkedin.com/in/username/)
+            - name (str): Full display name as shown on the profile
+            - location (str | null): Geographic location (e.g. "Stuttgart, Baden-Württemberg, Germany")
+            - about (str | null): The "About" section — a free-text professional summary
+            - open_to_work (bool): Whether the profile has the "Open to Work" flag enabled
+            - company (str | null): Current company name parsed from the headline
+            - job_title (str | null): Current job title parsed from the headline
+            - experiences (list): Work history, each entry containing:
+                - position_title: Job title held
+                - institution_name: Company or organization name
+                - linkedin_url: Company's LinkedIn page (if available)
+                - from_date, to_date: Employment period (e.g. "Jan 2020", "Present")
+                - duration: Human-readable duration (e.g. "3 yrs 2 mos")
+                - location: Office location for that role
+                - description: Role description text
+            - educations (list): Education history, each entry containing:
+                - institution_name: School or university name
+                - degree: Degree and field of study (e.g. "Master of Science, Computer Science")
+                - linkedin_url: Institution's LinkedIn page (if available)
+                - from_date, to_date: Attendance period
+                - description: Additional education details
+            - interests (list): Followed entities with category (company, group,
+              school, newsletter, influencer) and their linkedin_url
+            - accomplishments (list): Certifications, publications, patents, etc.
+              Each has a category and title.
+            - contacts (list): Contact information the member has made visible.
+              Each has type (email, phone, website, linkedin, twitter, birthday,
+              address), value, and optional label.
         """
         try:
             # Validate session before scraping

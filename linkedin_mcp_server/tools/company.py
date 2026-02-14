@@ -40,20 +40,36 @@ def register_company_tools(mcp: FastMCP) -> None:
     )
     async def get_company_profile(company_name: str, ctx: Context) -> Dict[str, Any]:
         """
-        Get a specific company's LinkedIn profile.
+        Get a company's full LinkedIn profile by its URL slug.
+
+        Scrapes the company's "About" page on LinkedIn for organizational details,
+        employee highlights, and affiliated entities. Use this for company research,
+        competitive analysis, or lead generation.
 
         Args:
-            company_name: LinkedIn company name (e.g., "docker", "anthropic", "microsoft")
-            ctx: FastMCP context for progress reporting
+            company_name: The URL slug that appears after linkedin.com/company/.
+                Examples: "docker", "anthropic", "microsoft", "robert-bosch-gmbh".
+                Do NOT pass full URLs — only the slug portion.
 
         Returns:
-            Structured data from the company's profile including:
-            - linkedin_url, name, about_us, website, phone
-            - headquarters, founded, industry, company_type, company_size
-            - specialties, headcount
-            - showcase_pages: List of showcase pages (linkedin_url, name, followers)
-            - affiliated_companies: List of affiliated companies
-            - employees: List of employees (name, designation, linkedin_url)
+            Structured company data with the following fields:
+            - linkedin_url (str): Full company page URL
+            - name (str): Official company name as displayed on LinkedIn
+            - about_us (str | null): Company description / "About" section
+            - website (str | null): Company website URL
+            - phone (str | null): Listed phone number
+            - headquarters (str | null): HQ location (e.g. "Stuttgart, Baden-Württemberg")
+            - founded (str | null): Year the company was founded
+            - industry (str | null): Primary industry (e.g. "Motor Vehicle Manufacturing")
+            - company_type (str | null): Organization type (e.g. "Public Company", "Nonprofit")
+            - company_size (str | null): Employee range (e.g. "10,001+ employees")
+            - specialties (str | null): Comma-separated list of specialties
+            - headcount (int | null): Approximate employee count on LinkedIn
+            - showcase_pages (list): Brand or product sub-pages, each with
+              linkedin_url, name, and followers count
+            - affiliated_companies (list): Sister companies or subsidiaries
+            - employees (list): Featured employees, each with name, designation,
+              and linkedin_url
         """
         try:
             # Validate session before scraping
@@ -89,20 +105,31 @@ def register_company_tools(mcp: FastMCP) -> None:
         """
         Get recent posts from a company's LinkedIn feed.
 
+        Scrapes the company's activity feed to retrieve their latest published
+        content. Use this to analyze a company's content strategy, track
+        announcements, or monitor engagement metrics.
+
         Args:
-            company_name: LinkedIn company name (e.g., "docker", "anthropic", "microsoft")
-            ctx: FastMCP context for progress reporting
-            limit: Maximum number of posts to return (default: 10)
+            company_name: The URL slug that appears after linkedin.com/company/.
+                Examples: "docker", "anthropic", "microsoft".
+                Do NOT pass full URLs — only the slug portion.
+            limit: Maximum number of posts to retrieve. Default: 10.
+                Higher values take longer as more scrolling is required.
 
         Returns:
-            Dict containing:
-            - count: Number of posts returned
-            - posts: List of post dicts with:
-              - linkedin_url, urn, text, posted_date
-              - reactions_count, comments_count, reposts_count
-              - image_urls: List of image URLs
-              - video_url: Video URL if present
-              - article_url: Article URL if present
+            Dict with:
+            - count (int): Number of posts actually returned (may be less than limit)
+            - posts (list): List of post objects, each containing:
+                - linkedin_url (str): Permalink to the post
+                - urn (str): LinkedIn internal post identifier
+                - text (str): Full post body text
+                - posted_date (str | null): When the post was published (e.g. "2 weeks ago")
+                - reactions_count (int): Total reactions (likes, celebrates, etc.)
+                - comments_count (int): Number of comments on the post
+                - reposts_count (int): Number of times the post was reposted
+                - image_urls (list[str]): URLs of images attached to the post
+                - video_url (str | null): Video URL if the post contains a video
+                - article_url (str | null): URL of a linked article if present
         """
         try:
             # Validate session before scraping
