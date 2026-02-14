@@ -224,8 +224,6 @@ def get_version() -> str:
 
 def main() -> None:
     """Main application entry point."""
-    sys.stderr.write("[mcp-linkedin-server] main() starting\n")
-    sys.stderr.flush()
     sys.stdout = io.TextIOWrapper(
         sys.stdout.buffer, encoding="utf-8", line_buffering=True
     )
