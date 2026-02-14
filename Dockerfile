@@ -33,5 +33,5 @@ RUN chown -R pwuser:pwuser /app
 USER pwuser
 
 # Set entrypoint and default arguments
-ENTRYPOINT ["uv", "run", "-m", "linkedin_mcp_server"]
+ENTRYPOINT ["uv", "run", "-m", "mcp_linkedin_server"]
 CMD []

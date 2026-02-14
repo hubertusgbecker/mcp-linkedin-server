@@ -16,12 +16,12 @@ from fastmcp import Context, FastMCP
 from linkedin_scraper import PersonScraper
 from mcp.types import ToolAnnotations
 
-from linkedin_mcp_server.callbacks import MCPContextProgressCallback
-from linkedin_mcp_server.drivers.browser import (
+from mcp_linkedin_server.callbacks import MCPContextProgressCallback
+from mcp_linkedin_server.drivers.browser import (
     ensure_authenticated,
     get_or_create_browser,
 )
-from linkedin_mcp_server.error_handler import handle_tool_error
+from mcp_linkedin_server.error_handler import handle_tool_error
 
 logger = logging.getLogger(__name__)
 

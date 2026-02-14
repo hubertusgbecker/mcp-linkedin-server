@@ -1,4 +1,4 @@
-# src/linkedin_mcp_server/cli.py
+# src/mcp_linkedin_server/cli.py
 """
 CLI utilities for LinkedIn MCP server configuration generation.
 
@@ -44,7 +44,7 @@ def print_claude_config() -> None:
         current_dir,
         "run",
         "-m",
-        "linkedin_mcp_server",
+        "mcp_linkedin_server",
     ]
 
     config_json: Dict[str, Any] = {

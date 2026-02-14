@@ -1,11 +1,11 @@
-"""Tests for linkedin_mcp_server.drivers.browser singleton lifecycle."""
+"""Tests for mcp_linkedin_server.drivers.browser singleton lifecycle."""
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from linkedin_mcp_server.config.schema import AppConfig
-from linkedin_mcp_server.drivers.browser import (
+from mcp_linkedin_server.config.schema import AppConfig
+from mcp_linkedin_server.drivers.browser import (
     get_or_create_browser,
     reset_browser_for_testing,
 )
@@ -25,7 +25,7 @@ def _mock_config(monkeypatch, tmp_path):
     config = AppConfig()
     config.browser.user_data_dir = str(tmp_path / "profile")
     monkeypatch.setattr(
-        "linkedin_mcp_server.drivers.browser.get_config", lambda: config
+        "mcp_linkedin_server.drivers.browser.get_config", lambda: config
     )
 
 
@@ -49,11 +49,11 @@ async def test_get_or_create_browser_auth_success(monkeypatch):
 
     with (
         patch(
-            "linkedin_mcp_server.drivers.browser.BrowserManager",
+            "mcp_linkedin_server.drivers.browser.BrowserManager",
             return_value=mock_browser,
         ),
         patch(
-            "linkedin_mcp_server.drivers.browser.is_logged_in",
+            "mcp_linkedin_server.drivers.browser.is_logged_in",
             new_callable=AsyncMock,
             return_value=True,
         ),
@@ -74,11 +74,11 @@ async def test_get_or_create_browser_auth_failure_cleans_up(monkeypatch):
 
     with (
         patch(
-            "linkedin_mcp_server.drivers.browser.BrowserManager",
+            "mcp_linkedin_server.drivers.browser.BrowserManager",
             return_value=mock_browser,
         ),
         patch(
-            "linkedin_mcp_server.drivers.browser.is_logged_in",
+            "mcp_linkedin_server.drivers.browser.is_logged_in",
             new_callable=AsyncMock,
             return_value=False,
         ),
@@ -90,7 +90,7 @@ async def test_get_or_create_browser_auth_failure_cleans_up(monkeypatch):
     mock_browser.close.assert_awaited_once()
 
     # Singleton must NOT be set — next call should create fresh browser
-    from linkedin_mcp_server.drivers.browser import _browser
+    from mcp_linkedin_server.drivers.browser import _browser
 
     assert _browser is None
 
@@ -102,11 +102,11 @@ async def test_singleton_returns_existing_browser(monkeypatch):
 
     with (
         patch(
-            "linkedin_mcp_server.drivers.browser.BrowserManager",
+            "mcp_linkedin_server.drivers.browser.BrowserManager",
             return_value=mock_browser,
         ) as ctor,
         patch(
-            "linkedin_mcp_server.drivers.browser.is_logged_in",
+            "mcp_linkedin_server.drivers.browser.is_logged_in",
             new_callable=AsyncMock,
             return_value=True,
         ),

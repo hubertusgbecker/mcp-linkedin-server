@@ -1,4 +1,4 @@
-# src/linkedin_mcp_server/__init__.py
+# src/mcp_linkedin_server/__init__.py
 """
 LinkedIn MCP Server package.
 

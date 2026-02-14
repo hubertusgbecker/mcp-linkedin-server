@@ -1,7 +1,7 @@
 from linkedin_scraper.core.exceptions import RateLimitError
 
-from linkedin_mcp_server.error_handler import handle_tool_error
-from linkedin_mcp_server.exceptions import (
+from mcp_linkedin_server.error_handler import handle_tool_error
+from mcp_linkedin_server.exceptions import (
     CredentialsNotFoundError,
     SessionExpiredError,
 )

@@ -18,7 +18,7 @@ from linkedin_scraper import (
 )
 from linkedin_scraper.core import detect_rate_limit
 
-from linkedin_mcp_server.config import get_config
+from mcp_linkedin_server.config import get_config
 
 logger = logging.getLogger(__name__)
 

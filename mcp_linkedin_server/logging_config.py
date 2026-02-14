@@ -1,4 +1,4 @@
-# linkedin_mcp_server/logging_config.py
+# mcp_linkedin_server/logging_config.py
 """
 Logging configuration for LinkedIn MCP Server with format options.
 
@@ -69,9 +69,9 @@ class CompactFormatter(logging.Formatter):
         )
         record_copy.stack_info = record.stack_info
 
-        # Shorten the logger name by removing the linkedin_mcp_server prefix
-        if record_copy.name.startswith("linkedin_mcp_server."):
-            record_copy.name = record_copy.name[len("linkedin_mcp_server.") :]
+        # Shorten the logger name by removing the mcp_linkedin_server prefix
+        if record_copy.name.startswith("mcp_linkedin_server."):
+            record_copy.name = record_copy.name[len("mcp_linkedin_server.") :]
 
         # Format the time as HH:MM:SS only
         record_copy.asctime = self.formatTime(record_copy, datefmt="%H:%M:%S")

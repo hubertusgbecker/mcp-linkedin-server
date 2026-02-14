@@ -21,8 +21,8 @@
     "cursorpyright.analysis.autoImportCompletions": true,
     "cursorpyright.analysis.diagnosticMode": "workspace",
     "cursorpyright.analysis.extraPaths": [
-        "./linkedin_mcp_server"
+        "./mcp_linkedin_server"
     ],
-    "cursorpyright.analysis.stubPath": "./linkedin_mcp_server",
+    "cursorpyright.analysis.stubPath": "./mcp_linkedin_server",
     "cursorpyright.analysis.typeCheckingMode": "off"
 }

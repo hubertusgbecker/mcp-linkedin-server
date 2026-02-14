@@ -19,7 +19,7 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 def _make_client() -> Client:
     transport = StdioTransport(
         command="uv",
-        args=["run", "--directory", PROJECT_ROOT, "-m", "linkedin_mcp_server"],
+        args=["run", "--directory", PROJECT_ROOT, "-m", "mcp_linkedin_server"],
     )
     return Client(transport)
 

@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastmcp import FastMCP
 
-from linkedin_mcp_server.tools.person import (
+from mcp_linkedin_server.tools.person import (
     _extract_profile_from_page_text,
     _is_empty_result,
     _parse_date_range,
@@ -262,11 +262,11 @@ class TestPersonToolFallback:
 
         for module in ["person"]:
             monkeypatch.setattr(
-                f"linkedin_mcp_server.tools.{module}.ensure_authenticated",
+                f"mcp_linkedin_server.tools.{module}.ensure_authenticated",
                 AsyncMock(),
             )
             monkeypatch.setattr(
-                f"linkedin_mcp_server.tools.{module}.get_or_create_browser",
+                f"mcp_linkedin_server.tools.{module}.get_or_create_browser",
                 AsyncMock(return_value=mock_browser),
             )
         return mock_page
@@ -280,7 +280,7 @@ class TestPersonToolFallback:
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=mock_person)
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.person.PersonScraper",
+            "mcp_linkedin_server.tools.person.PersonScraper",
             lambda *a, **kw: mock_scraper,
         )
 
@@ -303,7 +303,7 @@ class TestPersonToolFallback:
             side_effect=RuntimeError("CSS selector not found")
         )
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.person.PersonScraper",
+            "mcp_linkedin_server.tools.person.PersonScraper",
             lambda *a, **kw: mock_scraper,
         )
 
@@ -328,7 +328,7 @@ class TestPersonToolFallback:
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=mock_person)
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.person.PersonScraper",
+            "mcp_linkedin_server.tools.person.PersonScraper",
             lambda *a, **kw: mock_scraper,
         )
 

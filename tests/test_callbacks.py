@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from linkedin_mcp_server.callbacks import MCPContextProgressCallback
+from mcp_linkedin_server.callbacks import MCPContextProgressCallback
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-# src/linkedin_mcp_server/tools/__init__.py
+# src/mcp_linkedin_server/tools/__init__.py
 """
 LinkedIn scraping tools package.
 

@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastmcp import FastMCP
 
-from linkedin_mcp_server.tools.notifications import (
+from mcp_linkedin_server.tools.notifications import (
     _extract_notifications_from_page,
     _extract_profile_username_map,
     _parse_notification_line,
@@ -575,11 +575,11 @@ class TestNotificationsTool:
         mock_browser.page = mock_page
 
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.notifications.ensure_authenticated",
+            "mcp_linkedin_server.tools.notifications.ensure_authenticated",
             AsyncMock(),
         )
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.notifications.get_or_create_browser",
+            "mcp_linkedin_server.tools.notifications.get_or_create_browser",
             AsyncMock(return_value=mock_browser),
         )
         return mock_page
@@ -607,10 +607,10 @@ class TestNotificationsTool:
         assert len(result["notifications"]) == 2
 
     async def test_error_returns_structured_error(self, mock_context, monkeypatch):
-        from linkedin_mcp_server.exceptions import SessionExpiredError
+        from mcp_linkedin_server.exceptions import SessionExpiredError
 
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.notifications.ensure_authenticated",
+            "mcp_linkedin_server.tools.notifications.ensure_authenticated",
             AsyncMock(side_effect=SessionExpiredError()),
         )
 

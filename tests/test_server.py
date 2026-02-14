@@ -3,7 +3,7 @@
 from unittest.mock import AsyncMock, patch
 
 
-from linkedin_mcp_server.server import create_mcp_server
+from mcp_linkedin_server.server import create_mcp_server
 
 
 class TestCreateMCPServer:
@@ -40,7 +40,7 @@ class TestCreateMCPServer:
         tool = await mcp.get_tool("close_session")
 
         with patch(
-            "linkedin_mcp_server.server.close_browser",
+            "mcp_linkedin_server.server.close_browser",
             new_callable=AsyncMock,
         ):
             result = await tool.fn()
@@ -53,7 +53,7 @@ class TestCreateMCPServer:
         tool = await mcp.get_tool("close_session")
 
         with patch(
-            "linkedin_mcp_server.server.close_browser",
+            "mcp_linkedin_server.server.close_browser",
             new_callable=AsyncMock,
             side_effect=RuntimeError("browser already closed"),
         ):
@@ -66,12 +66,12 @@ class TestCreateMCPServer:
 class TestLifespan:
     async def test_lifespan_calls_close_browser(self):
         """Lifespan context manager closes browser on exit."""
-        from linkedin_mcp_server.server import lifespan
+        from mcp_linkedin_server.server import lifespan
 
         mcp = create_mcp_server()
 
         with patch(
-            "linkedin_mcp_server.server.close_browser",
+            "mcp_linkedin_server.server.close_browser",
             new_callable=AsyncMock,
         ) as mock_close:
             async with lifespan(mcp):

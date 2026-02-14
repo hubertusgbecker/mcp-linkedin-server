@@ -1,4 +1,4 @@
-from linkedin_mcp_server.exceptions import (
+from mcp_linkedin_server.exceptions import (
     CredentialsNotFoundError,
     LinkedInMCPError,
     SessionExpiredError,

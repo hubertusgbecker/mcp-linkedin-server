@@ -17,23 +17,23 @@ import inquirer
 from linkedin_scraper import is_logged_in
 from linkedin_scraper.core.exceptions import AuthenticationError, RateLimitError
 
-from linkedin_mcp_server.authentication import (
+from mcp_linkedin_server.authentication import (
     clear_profile,
     get_authentication_source,
 )
-from linkedin_mcp_server.cli import print_claude_config
-from linkedin_mcp_server.config import get_config
-from linkedin_mcp_server.drivers.browser import (
+from mcp_linkedin_server.cli import print_claude_config
+from mcp_linkedin_server.config import get_config
+from mcp_linkedin_server.drivers.browser import (
     close_browser,
     get_or_create_browser,
     get_profile_dir,
     profile_exists,
     set_headless,
 )
-from linkedin_mcp_server.exceptions import CredentialsNotFoundError
-from linkedin_mcp_server.logging_config import configure_logging
-from linkedin_mcp_server.server import create_mcp_server
-from linkedin_mcp_server.setup import run_interactive_setup, run_profile_creation
+from mcp_linkedin_server.exceptions import CredentialsNotFoundError
+from mcp_linkedin_server.logging_config import configure_logging
+from mcp_linkedin_server.server import create_mcp_server
+from mcp_linkedin_server.setup import run_interactive_setup, run_profile_creation
 
 logger = logging.getLogger(__name__)
 

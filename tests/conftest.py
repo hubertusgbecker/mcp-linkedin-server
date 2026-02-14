@@ -4,8 +4,8 @@ import pytest
 @pytest.fixture(autouse=True)
 def reset_singletons():
     """Reset global state for test isolation."""
-    from linkedin_mcp_server.config import reset_config
-    from linkedin_mcp_server.drivers.browser import reset_browser_for_testing
+    from mcp_linkedin_server.config import reset_config
+    from mcp_linkedin_server.drivers.browser import reset_browser_for_testing
 
     reset_browser_for_testing()
     reset_config()
@@ -21,10 +21,10 @@ def isolate_profile_dir(tmp_path, monkeypatch):
 
     # Patch DEFAULT_PROFILE_DIR for any code still referencing the constant
     for module in [
-        "linkedin_mcp_server.drivers.browser",
-        "linkedin_mcp_server.authentication",
-        "linkedin_mcp_server.cli_main",
-        "linkedin_mcp_server.setup",
+        "mcp_linkedin_server.drivers.browser",
+        "mcp_linkedin_server.authentication",
+        "mcp_linkedin_server.cli_main",
+        "mcp_linkedin_server.setup",
     ]:
         try:
             monkeypatch.setattr(f"{module}.DEFAULT_PROFILE_DIR", fake_profile)
@@ -33,10 +33,10 @@ def isolate_profile_dir(tmp_path, monkeypatch):
 
     # Patch get_profile_dir() in all modules that import it
     for gp_module in [
-        "linkedin_mcp_server.drivers.browser",
-        "linkedin_mcp_server.authentication",
-        "linkedin_mcp_server.cli_main",
-        "linkedin_mcp_server.setup",
+        "mcp_linkedin_server.drivers.browser",
+        "mcp_linkedin_server.authentication",
+        "mcp_linkedin_server.cli_main",
+        "mcp_linkedin_server.setup",
     ]:
         try:
             monkeypatch.setattr(f"{gp_module}.get_profile_dir", lambda: fake_profile)

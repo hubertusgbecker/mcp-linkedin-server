@@ -13,7 +13,7 @@ Key Components:
 - Automatic cleanup and resource management
 """
 
-from linkedin_mcp_server.drivers.browser import (
+from mcp_linkedin_server.drivers.browser import (
     DEFAULT_PROFILE_DIR,
     check_rate_limit,
     close_browser,

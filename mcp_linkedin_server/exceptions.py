@@ -1,4 +1,4 @@
-# src/linkedin_mcp_server/exceptions.py
+# src/mcp_linkedin_server/exceptions.py
 """
 Custom exceptions for LinkedIn MCP Server with specific error categorization.
 

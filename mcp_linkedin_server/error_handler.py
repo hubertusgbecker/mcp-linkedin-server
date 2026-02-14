@@ -18,7 +18,7 @@ from linkedin_scraper.core.exceptions import (
     ScrapingError,
 )
 
-from linkedin_mcp_server.exceptions import (
+from mcp_linkedin_server.exceptions import (
     CredentialsNotFoundError,
     LinkedInMCPError,
     SessionExpiredError,

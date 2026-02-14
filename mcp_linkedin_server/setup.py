@@ -11,7 +11,7 @@ from pathlib import Path
 from linkedin_scraper import BrowserManager, wait_for_manual_login
 from linkedin_scraper.core import warm_up_browser
 
-from linkedin_mcp_server.drivers.browser import get_profile_dir
+from mcp_linkedin_server.drivers.browser import get_profile_dir
 
 
 async def interactive_login(

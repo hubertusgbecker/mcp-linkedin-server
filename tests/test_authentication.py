@@ -1,8 +1,8 @@
 import pytest
 
-from linkedin_mcp_server.authentication import clear_profile, get_authentication_source
-from linkedin_mcp_server.drivers.browser import profile_exists
-from linkedin_mcp_server.exceptions import CredentialsNotFoundError
+from mcp_linkedin_server.authentication import clear_profile, get_authentication_source
+from mcp_linkedin_server.drivers.browser import profile_exists
+from mcp_linkedin_server.exceptions import CredentialsNotFoundError
 
 
 # --- profile_exists() tests ---
@@ -37,14 +37,14 @@ def test_profile_exists_file_path(tmp_path):
 
 def test_get_auth_source_profile(profile_dir, monkeypatch):
     monkeypatch.setattr(
-        "linkedin_mcp_server.authentication.profile_exists", lambda _dir=None: True
+        "mcp_linkedin_server.authentication.profile_exists", lambda _dir=None: True
     )
     assert get_authentication_source() is True
 
 
 def test_get_auth_source_none_raises(monkeypatch):
     monkeypatch.setattr(
-        "linkedin_mcp_server.authentication.profile_exists", lambda _dir=None: False
+        "mcp_linkedin_server.authentication.profile_exists", lambda _dir=None: False
     )
     with pytest.raises(CredentialsNotFoundError):
         get_authentication_source()

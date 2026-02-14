@@ -41,14 +41,14 @@
             "problemMatcher": []
         },
         {
-            "label": "uv run -m linkedin_mcp_server --log-level DEBUG --no-headless",
+            "label": "uv run -m mcp_linkedin_server --log-level DEBUG --no-headless",
             "detail": "Run server in debug mode with visible browser window",
             "type": "shell",
             "command": "uv",
             "args": [
                 "run",
                 "-m",
-                "linkedin_mcp_server",
+                "mcp_linkedin_server",
                 "--log-level",
                 "DEBUG",
                 "--no-headless"
@@ -65,14 +65,14 @@
             "problemMatcher": []
         },
         {
-            "label": "uv run -m linkedin_mcp_server --no-headless",
+            "label": "uv run -m mcp_linkedin_server --no-headless",
             "detail": "Run server with visible browser window",
             "type": "shell",
             "command": "uv",
             "args": [
                 "run",
                 "-m",
-                "linkedin_mcp_server",
+                "mcp_linkedin_server",
                 "--no-headless"
             ],
             "group": {
@@ -86,14 +86,14 @@
             "problemMatcher": []
         },
         {
-            "label": "uv run -m linkedin_mcp_server --no-headless --transport streamable-http",
+            "label": "uv run -m mcp_linkedin_server --no-headless --transport streamable-http",
             "detail": "Start HTTP MCP server on localhost:8000/mcp",
             "type": "shell",
             "command": "uv",
             "args": [
                 "run",
                 "-m",
-                "linkedin_mcp_server",
+                "mcp_linkedin_server",
                 "--no-headless",
                 "--transport",
                 "streamable-http"
@@ -111,14 +111,14 @@
             "problemMatcher": []
         },
         {
-            "label": "uv run -m linkedin_mcp_server --get-session",
+            "label": "uv run -m mcp_linkedin_server --get-session",
             "detail": "Login to LinkedIn and save session (opens visible browser)",
             "type": "shell",
             "command": "uv",
             "args": [
                 "run",
                 "-m",
-                "linkedin_mcp_server",
+                "mcp_linkedin_server",
                 "--get-session"
             ],
             "group": {

@@ -8,11 +8,11 @@ import logging
 import shutil
 from pathlib import Path
 
-from linkedin_mcp_server.drivers.browser import (
+from mcp_linkedin_server.drivers.browser import (
     get_profile_dir,
     profile_exists,
 )
-from linkedin_mcp_server.exceptions import CredentialsNotFoundError
+from mcp_linkedin_server.exceptions import CredentialsNotFoundError
 
 logger = logging.getLogger(__name__)
 

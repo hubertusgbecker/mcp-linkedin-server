@@ -23,10 +23,10 @@ def patch_tool_deps(monkeypatch):
 
     for module in ["person", "company", "job"]:
         monkeypatch.setattr(
-            f"linkedin_mcp_server.tools.{module}.ensure_authenticated", AsyncMock()
+            f"mcp_linkedin_server.tools.{module}.ensure_authenticated", AsyncMock()
         )
         monkeypatch.setattr(
-            f"linkedin_mcp_server.tools.{module}.get_or_create_browser",
+            f"mcp_linkedin_server.tools.{module}.get_or_create_browser",
             AsyncMock(return_value=mock_browser),
         )
 
@@ -42,11 +42,11 @@ class TestPersonTool:
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=mock_person)
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.person.PersonScraper",
+            "mcp_linkedin_server.tools.person.PersonScraper",
             lambda *a, **kw: mock_scraper,
         )
 
-        from linkedin_mcp_server.tools.person import register_person_tools
+        from mcp_linkedin_server.tools.person import register_person_tools
 
         mcp = FastMCP("test")
         register_person_tools(mcp)
@@ -57,14 +57,14 @@ class TestPersonTool:
         assert result["location"] == "Berlin"
 
     async def test_get_person_profile_error(self, mock_context, monkeypatch):
-        from linkedin_mcp_server.exceptions import SessionExpiredError
+        from mcp_linkedin_server.exceptions import SessionExpiredError
 
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.person.ensure_authenticated",
+            "mcp_linkedin_server.tools.person.ensure_authenticated",
             AsyncMock(side_effect=SessionExpiredError()),
         )
 
-        from linkedin_mcp_server.tools.person import register_person_tools
+        from mcp_linkedin_server.tools.person import register_person_tools
 
         mcp = FastMCP("test")
         register_person_tools(mcp)
@@ -83,11 +83,11 @@ class TestCompanyTools:
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=mock_company)
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.company.CompanyScraper",
+            "mcp_linkedin_server.tools.company.CompanyScraper",
             lambda *a, **kw: mock_scraper,
         )
 
-        from linkedin_mcp_server.tools.company import register_company_tools
+        from mcp_linkedin_server.tools.company import register_company_tools
 
         mcp = FastMCP("test")
         register_company_tools(mcp)
@@ -102,11 +102,11 @@ class TestCompanyTools:
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=[mock_post])
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.company.CompanyPostsScraper",
+            "mcp_linkedin_server.tools.company.CompanyPostsScraper",
             lambda *a, **kw: mock_scraper,
         )
 
-        from linkedin_mcp_server.tools.company import register_company_tools
+        from mcp_linkedin_server.tools.company import register_company_tools
 
         mcp = FastMCP("test")
         register_company_tools(mcp)
@@ -124,10 +124,10 @@ class TestJobTools:
         mock_scraper = MagicMock()
         mock_scraper.scrape = AsyncMock(return_value=mock_job)
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.job.JobScraper", lambda *a, **kw: mock_scraper
+            "mcp_linkedin_server.tools.job.JobScraper", lambda *a, **kw: mock_scraper
         )
 
-        from linkedin_mcp_server.tools.job import register_job_tools
+        from mcp_linkedin_server.tools.job import register_job_tools
 
         mcp = FastMCP("test")
         register_job_tools(mcp)
@@ -140,11 +140,11 @@ class TestJobTools:
         mock_scraper = MagicMock()
         mock_scraper.search = AsyncMock(return_value=["url1", "url2"])
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.job.JobSearchScraper",
+            "mcp_linkedin_server.tools.job.JobSearchScraper",
             lambda *a, **kw: mock_scraper,
         )
 
-        from linkedin_mcp_server.tools.job import register_job_tools
+        from mcp_linkedin_server.tools.job import register_job_tools
 
         mcp = FastMCP("test")
         register_job_tools(mcp)

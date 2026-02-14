@@ -48,19 +48,19 @@ Issues = "https://github.com/stickerdaniel/linkedin-mcp-server/issues"
 Changelog = "https://github.com/stickerdaniel/linkedin-mcp-server/releases"
 
 [project.scripts]
-linkedin-mcp-server = "linkedin_mcp_server.cli_main:main"
-linkedin-scraper-mcp = "linkedin_mcp_server.cli_main:main"
+linkedin-mcp-server = "mcp_linkedin_server.cli_main:main"
+linkedin-scraper-mcp = "mcp_linkedin_server.cli_main:main"
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["linkedin_mcp_server*"]
+include = ["mcp_linkedin_server*"]
 exclude = ["assets*", "docs*", "tests*"]
 
 [tool.setuptools.package-data]
-linkedin_mcp_server = ["py.typed"]
+mcp_linkedin_server = ["py.typed"]
 
 [dependency-groups]
 dev = [

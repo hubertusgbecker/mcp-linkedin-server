@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastmcp import FastMCP
 
-from linkedin_mcp_server.tools.analytics import (
+from mcp_linkedin_server.tools.analytics import (
     _extract_analytics_from_page,
     _parse_analytics_number,
     register_analytics_tools,
@@ -246,11 +246,11 @@ class TestProfileAnalyticsTool:
         mock_browser.page = mock_page
 
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.analytics.ensure_authenticated",
+            "mcp_linkedin_server.tools.analytics.ensure_authenticated",
             AsyncMock(),
         )
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.analytics.get_or_create_browser",
+            "mcp_linkedin_server.tools.analytics.get_or_create_browser",
             AsyncMock(return_value=mock_browser),
         )
         return mock_page
@@ -268,10 +268,10 @@ class TestProfileAnalyticsTool:
         assert result["weekly_posts"] == 0
 
     async def test_error_returns_structured_error(self, mock_context, monkeypatch):
-        from linkedin_mcp_server.exceptions import SessionExpiredError
+        from mcp_linkedin_server.exceptions import SessionExpiredError
 
         monkeypatch.setattr(
-            "linkedin_mcp_server.tools.analytics.ensure_authenticated",
+            "mcp_linkedin_server.tools.analytics.ensure_authenticated",
             AsyncMock(side_effect=SessionExpiredError()),
         )
 

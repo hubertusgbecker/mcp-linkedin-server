@@ -1,10 +1,10 @@
-# LinkedIn MCP Server (Fork)
+# MCP LinkedIn Server (Fork)
 
 Fork of [stickerdaniel/linkedin-mcp-server](https://github.com/stickerdaniel/linkedin-mcp-server) with significant additions including notifications with author username resolution, profile analytics dashboard scraping, and improved error handling.
 
 <p align="left">
   <a href="https://github.com/stickerdaniel/linkedin-mcp-server" target="_blank"><img src="https://img.shields.io/badge/upstream-stickerdaniel%2Flinkedin--mcp--server-blue" alt="Upstream"></a>
-  <a href="https://github.com/stickerdaniel/linkedin-mcp-server/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/badge/License-Apache%202.0-brightgreen?labelColor=32383f" alt="License"></a>
+  <a href="https://github.com/hubertusgbecker/mcp-linkedin-server/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/badge/License-Apache%202.0-brightgreen?labelColor=32383f" alt="License"></a>
 </p>
 
 ## What Changed in This Fork
@@ -155,7 +155,7 @@ uvx linkedin-scraper-mcp --get-session
       "args": [
         "run", "--rm", "-i",
         "-v", "~/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
-        "stickerdaniel/linkedin-mcp-server:latest"
+        "hubertusgbecker/mcp-linkedin-server:latest"
       ]
     }
   }
@@ -189,7 +189,7 @@ uvx linkedin-scraper-mcp --get-session
 docker run -it --rm \
   -v ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp \
   -p 8080:8080 \
-  stickerdaniel/linkedin-mcp-server:latest \
+  hubertusgbecker/mcp-linkedin-server:latest \
   --transport streamable-http --host 0.0.0.0 --port 8080 --path /mcp
 ```
 
@@ -221,7 +221,7 @@ docker run -it --rm \
 
 **Prerequisites:** [Claude Desktop](https://claude.ai/download) and [Docker](https://www.docker.com/get-started/) installed and running
 
-1. Download the [DXT extension](https://github.com/stickerdaniel/linkedin-mcp-server/releases/latest)
+1. Download the [DXT extension](https://github.com/hubertusgbecker/mcp-linkedin-server/releases/latest)
 2. Double-click to install into Claude Desktop
 3. Create a session: `uvx linkedin-scraper-mcp --get-session`
 
@@ -234,7 +234,7 @@ docker run -it --rm \
 
 - Claude Desktop has a ~60 second connection timeout
 - If the Docker image is not cached, the pull may exceed this
-- Fix: pre-pull the image before first use: `docker pull stickerdaniel/linkedin-mcp-server:latest`
+- Fix: pre-pull the image before first use: `docker pull hubertusgbecker/mcp-linkedin-server:latest`
 - Then restart Claude Desktop
 
 **Docker issues:**
@@ -275,10 +275,10 @@ uv run patchright install chromium
 uv run pre-commit install
 
 # Create a session (first time only)
-uv run -m linkedin_mcp_server --get-session
+uv run -m mcp_linkedin_server --get-session
 
 # Start the server
-uv run -m linkedin_mcp_server
+uv run -m mcp_linkedin_server
 ```
 
 <details>
@@ -308,7 +308,7 @@ Most CLI options have environment variable equivalents. See `.env.example` for d
 **HTTP mode example:**
 
 ```bash
-uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
+uv run -m mcp_linkedin_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
 ```
 
 **Claude Desktop configuration:**
@@ -318,7 +318,7 @@ uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --por
   "mcpServers": {
     "linkedin": {
       "command": "uv",
-      "args": ["--directory", "/path/to/linkedin-mcp-server", "run", "-m", "linkedin_mcp_server"]
+      "args": ["--directory", "/path/to/linkedin-mcp-server", "run", "-m", "mcp_linkedin_server"]
     }
   }
 }
