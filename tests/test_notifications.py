@@ -15,8 +15,10 @@ from fastmcp import FastMCP
 
 from linkedin_mcp_server.tools.notifications import (
     _extract_notifications_from_page,
+    _extract_profile_username_map,
     _parse_notification_line,
     _parse_time_ago,
+    _resolve_username,
     register_notification_tools,
 )
 
@@ -136,17 +138,38 @@ class TestParseNotificationLine:
 
 def _make_mock_page(
     main_text: str = "",
+    profile_links: list | None = None,
     url: str = "https://www.linkedin.com/notifications/",
 ) -> MagicMock:
     page = MagicMock()
     page.goto = AsyncMock()
     page.url = url
-    page.evaluate = AsyncMock(return_value=main_text)
+
+    async def _mock_evaluate(js_code: str):
+        """Return profile links for the DOM query, innerText otherwise."""
+        if "/in/" in js_code or "/company/" in js_code:
+            return profile_links if profile_links is not None else []
+        return main_text
+
+    page.evaluate = AsyncMock(side_effect=_mock_evaluate)
     page.wait_for_timeout = AsyncMock()
     page.wait_for_selector = AsyncMock()
     page.query_selector = AsyncMock(return_value=None)
     page.query_selector_all = AsyncMock(return_value=[])
     return page
+
+
+# Profile links corresponding to the sample notifications text.
+# In the real DOM, the JS extracts names from aria-label attributes
+# (e.g. "View Stephen Klein's profile.") and usernames from href paths.
+SAMPLE_PROFILE_LINKS = [
+    {"name": "Stephen Klein", "username": "stephenbklein"},
+    {"name": "Stefan Michel", "username": "prof-stefan-michel"},
+    {"name": "Ray Dalio", "username": "raydalio"},
+    {"name": "Lewis Walker ➲", "username": "lewiswalker"},
+    {"name": "NVIDIA AI", "username": "nvidia"},
+    {"name": "Ben Torben-Nielsen, PhD, MBA", "username": "bentorbennielsen"},
+]
 
 
 # Realistic notifications page text (based on actual scrape)
@@ -218,9 +241,107 @@ No notifications yet.
 """
 
 
+# ============================================================================
+#  _extract_profile_username_map
+# ============================================================================
+
+
+class TestExtractProfileUsernameMap:
+    async def test_basic_extraction(self):
+        page = _make_mock_page(profile_links=SAMPLE_PROFILE_LINKS)
+        result = await _extract_profile_username_map(page)
+
+        assert result["stephen klein"] == "stephenbklein"
+        assert result["ray dalio"] == "raydalio"
+
+    async def test_case_insensitive_keys(self):
+        page = _make_mock_page(
+            profile_links=[{"name": "Ray Dalio", "username": "raydalio"}]
+        )
+        result = await _extract_profile_username_map(page)
+        assert "ray dalio" in result
+
+    async def test_first_occurrence_wins(self):
+        page = _make_mock_page(
+            profile_links=[
+                {"name": "Ray Dalio", "username": "raydalio"},
+                {"name": "Ray Dalio", "username": "raydalio2"},
+            ]
+        )
+        result = await _extract_profile_username_map(page)
+        assert result["ray dalio"] == "raydalio"
+
+    async def test_empty_links(self):
+        page = _make_mock_page(profile_links=[])
+        result = await _extract_profile_username_map(page)
+        assert result == {}
+
+    async def test_evaluate_error_returns_empty(self):
+        page = MagicMock()
+        page.evaluate = AsyncMock(side_effect=Exception("DOM error"))
+        result = await _extract_profile_username_map(page)
+        assert result == {}
+
+    async def test_aria_label_name_used_when_innertext_empty(self):
+        """Simulate real LinkedIn DOM: profile links have empty innerText,
+        name comes from aria-label 'View NAME's profile.'"""
+        page = _make_mock_page(
+            profile_links=[
+                {"name": "Ethan Mollick", "username": "emollick"},
+                {"name": "Carson V. Heady", "username": "carsonvheady"},
+            ]
+        )
+        result = await _extract_profile_username_map(page)
+        assert result["ethan mollick"] == "emollick"
+        assert result["carson v. heady"] == "carsonvheady"
+
+
+# ============================================================================
+#  _resolve_username
+# ============================================================================
+
+
+class TestResolveUsername:
+    def test_exact_match(self):
+        profile_map = {"ray dalio": "raydalio"}
+        assert _resolve_username("Ray Dalio", profile_map) == "raydalio"
+
+    def test_no_match(self):
+        profile_map = {"ray dalio": "raydalio"}
+        assert _resolve_username("Unknown Author", profile_map) is None
+
+    def test_substring_match_author_in_name(self):
+        profile_map = {"ben torben-nielsen, phd, mba": "bentorbennielsen"}
+        # Shorter author name is a substring of the map key → fuzzy match
+        assert (
+            _resolve_username("Ben Torben-Nielsen", profile_map) == "bentorbennielsen"
+        )
+        # Full name matches exactly
+        assert (
+            _resolve_username("Ben Torben-Nielsen, PhD, MBA", profile_map)
+            == "bentorbennielsen"
+        )
+
+    def test_fuzzy_contains(self):
+        profile_map = {"lewis walker ➲": "lewiswalker"}
+        # Map key contains "lewis walker" which is substring of author
+        assert _resolve_username("Lewis Walker ➲", profile_map) == "lewiswalker"
+
+    def test_empty_map(self):
+        assert _resolve_username("Anyone", {}) is None
+
+
+# ============================================================================
+#  _extract_notifications_from_page
+# ============================================================================
+
+
 class TestExtractNotificationsFromPage:
     async def test_full_page_default_limit(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         assert isinstance(result, list)
@@ -228,34 +349,48 @@ class TestExtractNotificationsFromPage:
         assert len(result) >= 5
 
     async def test_limit_respected(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=3)
 
         assert len(result) == 3
 
     async def test_notification_structure(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         first = result[0]
         assert "author" in first
+        assert "linkedin_username" in first
         assert "text" in first
         assert "time_ago" in first
         assert "is_unread" in first
 
     async def test_first_notification_content(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         first = result[0]
         assert first["author"] == "Stephen Klein"
+        assert first["linkedin_username"] == "stephenbklein"
         assert first["action"] == "posted"
         assert "Curiouser" in first["text"]
         assert first["time_ago"] == "5m"
         assert first["is_unread"] is True
 
     async def test_unread_vs_read(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         # First 3 are preceded by "Unread notification."
@@ -268,7 +403,10 @@ class TestExtractNotificationsFromPage:
         assert walker[0]["is_unread"] is False
 
     async def test_status_lines_excluded(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=20)
 
         authors = [n["author"] for n in result]
@@ -278,19 +416,27 @@ class TestExtractNotificationsFromPage:
             assert not n["author"].startswith("Status")
 
     async def test_event_notification_parsed(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=20)
 
         events = [n for n in result if n["action"] == "hosted this event"]
         assert len(events) == 1
         assert events[0]["author"] == "NVIDIA AI"
+        assert events[0]["linkedin_username"] == "nvidia"
 
     async def test_minimal_page(self):
-        page = _make_mock_page(main_text=MINIMAL_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=MINIMAL_NOTIFICATIONS_TEXT,
+            profile_links=[{"name": "Ray Dalio", "username": "raydalio"}],
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         assert len(result) == 1
         assert result[0]["author"] == "Ray Dalio"
+        assert result[0]["linkedin_username"] == "raydalio"
         assert result[0]["time_ago"] == "2h"
 
     async def test_no_notifications(self):
@@ -300,24 +446,57 @@ class TestExtractNotificationsFromPage:
         assert result == []
 
     async def test_result_is_list(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
         assert isinstance(result, list)
 
     async def test_repost_detected(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         reposts = [n for n in result if n["action"] == "reposted"]
         assert len(reposts) == 1
         assert reposts[0]["author"] == "Lewis Walker ➲"
+        assert reposts[0]["linkedin_username"] == "lewiswalker"
 
     async def test_time_ago_minutes_populated(self):
-        page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         result = await _extract_notifications_from_page(page, limit=10)
 
         first = result[0]
         assert first["minutes_ago"] == 5
+
+    async def test_linkedin_username_populated(self):
+        page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
+        result = await _extract_notifications_from_page(page, limit=10)
+
+        # All authors in sample data have profile links
+        for n in result:
+            assert n["linkedin_username"] is not None, (
+                f"Missing linkedin_username for {n['author']}"
+            )
+
+    async def test_linkedin_username_none_when_no_links(self):
+        page = _make_mock_page(
+            main_text=MINIMAL_NOTIFICATIONS_TEXT,
+            profile_links=[],
+        )
+        result = await _extract_notifications_from_page(page, limit=10)
+
+        assert len(result) == 1
+        assert result[0]["linkedin_username"] is None
 
 
 # ============================================================================
@@ -328,7 +507,10 @@ class TestExtractNotificationsFromPage:
 class TestNotificationsTool:
     @pytest.fixture
     def mock_deps(self, monkeypatch):
-        mock_page = _make_mock_page(main_text=SAMPLE_NOTIFICATIONS_TEXT)
+        mock_page = _make_mock_page(
+            main_text=SAMPLE_NOTIFICATIONS_TEXT,
+            profile_links=SAMPLE_PROFILE_LINKS,
+        )
         mock_browser = MagicMock()
         mock_browser.page = mock_page
 

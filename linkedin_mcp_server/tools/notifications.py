@@ -154,23 +154,109 @@ def _parse_notification_line(line: str) -> Optional[Dict[str, str]]:
     return None
 
 
+_PROFILE_LINKS_JS = r"""() => {
+    const result = [];
+    const main = document.querySelector('main') || document.body;
+    const links = main.querySelectorAll('a[href*="/in/"], a[href*="/company/"]');
+    for (const a of links) {
+        const href = a.getAttribute('href') || '';
+        const personMatch = href.match(/\/in\/([^/?#]+)/);
+        const companyMatch = href.match(/\/company\/([^/?#]+)/);
+        const username = personMatch
+            ? decodeURIComponent(personMatch[1])
+            : companyMatch
+              ? decodeURIComponent(companyMatch[1])
+              : null;
+        if (!username) continue;
+
+        // LinkedIn notification profile links are avatar images whose
+        // textContent is a status string ("Status is offline") and whose
+        // aria-label carries the name: "View Ethan Mollick\u2019s profile."
+        const aria = (a.getAttribute('aria-label') || '').trim();
+        let name = '';
+        if (aria) {
+            // Strip "View " prefix and remove possessive + " profile." suffix.
+            // The apostrophe may be U+0027 ('), U+2018, or U+2019.
+            name = aria
+                .replace(/^View\s+/i, '')
+                .replace(/[\u0027\u2018\u2019]s\s+profile\.?\s*$/i, '')
+                .trim();
+            // If stripping didn't change anything, discard
+            if (name === aria) name = '';
+        }
+        // Fallback: try innerText if aria-label didn't work
+        if (!name) {
+            const txt = (a.innerText || '').trim();
+            if (txt && !txt.startsWith('Status is ')) {
+                name = txt;
+            }
+        }
+        if (name) {
+            result.push({name, username});
+        }
+    }
+    return result;
+}"""
+
+
+async def _extract_profile_username_map(page: Any) -> Dict[str, str]:
+    """Extract a mapping of author display names → LinkedIn usernames from DOM.
+
+    Queries the notifications page DOM for ``<a>`` tags whose ``href``
+    contains ``/in/<username>`` or ``/company/<slug>`` and builds a
+    case-insensitive lookup dict (first occurrence wins).
+    """
+    try:
+        links_data: List[Dict[str, str]] = await page.evaluate(_PROFILE_LINKS_JS)
+    except Exception:
+        logger.debug("Failed to extract profile links from DOM", exc_info=True)
+        return {}
+
+    name_map: Dict[str, str] = {}
+    for item in links_data:
+        name_lower = item["name"].lower().strip()
+        if name_lower and name_lower not in name_map:
+            name_map[name_lower] = item["username"]
+    return name_map
+
+
+def _resolve_username(author: str, profile_map: Dict[str, str]) -> Optional[str]:
+    """Look up a LinkedIn username for *author* in *profile_map*.
+
+    Tries an exact (case-insensitive) match first, then falls back to a
+    substring containment check in both directions.
+    """
+    author_lower = author.lower().strip()
+    username = profile_map.get(author_lower)
+    if username:
+        return username
+    # Fuzzy: author might be a substring of the link text or vice-versa
+    for name, uname in profile_map.items():
+        if author_lower in name or name in author_lower:
+            return uname
+    return None
+
+
 async def _extract_notifications_from_page(
-    page, limit: int = 10
+    page: Any, limit: int = 10
 ) -> List[Dict[str, Any]]:
-    """Extract notification items from the LinkedIn notifications page innerText.
+    """Extract notification items from the LinkedIn notifications page.
 
     Each notification in the text follows a repeating pattern:
     - Optional: "Unread notification." marker
     - Content line: "Author posted: text..." / "Author reposted ..." / etc.
     - Time line: "5m", "1h", "2d"
 
+    Profile links (``/in/<username>``) are extracted from the DOM so that each
+    notification includes the author's LinkedIn username when available.
+
     Args:
         page: Patchright page object (already navigated to /notifications/).
         limit: Maximum number of notifications to return.
 
     Returns:
-        A list of notification dicts, each with: author, action, text,
-        time_ago, minutes_ago, is_unread.
+        A list of notification dicts, each with: author, linkedin_username,
+        action, text, time_ago, minutes_ago, is_unread.
     """
     main_text = await page.evaluate(
         "() => { const m = document.querySelector('main'); return m ? m.innerText : ''; }"
@@ -180,6 +266,9 @@ async def _extract_notifications_from_page(
 
     if not main_text:
         main_text = await page.evaluate("() => document.body.innerText || ''")
+
+    # Extract author → username map from DOM profile links
+    profile_map = await _extract_profile_username_map(page)
 
     lines = [line.strip() for line in main_text.split("\n") if line.strip()]
 
@@ -255,6 +344,7 @@ async def _extract_notifications_from_page(
 
             notification: Dict[str, Any] = {
                 "author": parsed["author"],
+                "linkedin_username": _resolve_username(parsed["author"], profile_map),
                 "action": parsed["action"],
                 "text": parsed["text"],
                 "time_ago": time_ago,
@@ -303,6 +393,8 @@ def register_notification_tools(mcp: FastMCP) -> None:
             Dict with:
             - notifications (list[dict]): List of notification objects, each with:
                 - author (str): Name of the person or organization
+                - linkedin_username (str | null): LinkedIn username or company slug extracted
+                  from the profile link (e.g. "raydalio", "nvidia"). null when no link found.
                 - action (str): What they did: "posted", "reposted", "commented on your post",
                   "liked your post", "hosted this event", etc.
                 - text (str): Preview of the notification content
