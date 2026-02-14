@@ -25,7 +25,7 @@ This fork extends the original server with two new tool categories and various f
 | `search_jobs` | Search for jobs with keywords and location filters | Upstream |
 | `get_job_details` | Detailed information about a specific job posting | Upstream |
 | `get_notifications` | Recent notifications with author LinkedIn usernames, actions, timestamps | Fork |
-| `get_post_content` | Full post text, author, headline, and engagement metrics from any post URL | Fork |
+| `get_post_content` | Full post text, author, linkedin_username, headline, and engagement metrics from any post URL | Fork |
 | `get_profile_analytics` | Dashboard analytics: profile views, impressions, search appearances, followers | Fork |
 | `close_session` | Close browser session and clean up resources | Upstream |
 

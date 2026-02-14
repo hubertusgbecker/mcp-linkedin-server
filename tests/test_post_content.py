@@ -55,6 +55,7 @@ SAMPLE_POST_DATA = {
     "reactions_label": "142 reactions",
     "comments_label": "23 comments",
     "reposts_label": "8 reposts",
+    "author_profile_url": "/in/gennarocuofano",
 }
 
 SAMPLE_POST_MINIMAL = {
@@ -65,6 +66,7 @@ SAMPLE_POST_MINIMAL = {
     "reactions_label": "",
     "comments_label": "",
     "reposts_label": "",
+    "author_profile_url": "/in/testuser",
 }
 
 
@@ -88,6 +90,7 @@ def _make_mock_post_page(data: dict | None = None) -> MagicMock:
             "reactions_label": data.get("reactions_label", ""),
             "comments_label": data.get("comments_label", ""),
             "reposts_label": data.get("reposts_label", ""),
+            "author_profile_url": data.get("author_profile_url", ""),
         }
 
     page.evaluate = AsyncMock(side_effect=_mock_evaluate)
@@ -162,6 +165,46 @@ class TestExtractPostContentFromPage:
             == "CRO at WordLift | Founder of The Business Engineer"
         )
 
+    async def test_returns_linkedin_username(self):
+        page = _make_mock_post_page()
+        result = await _extract_post_content_from_page(page)
+
+        assert result["linkedin_username"] == "gennarocuofano"
+
+    async def test_linkedin_username_none_when_missing(self):
+        page = _make_mock_post_page(
+            data={
+                "text": "No link post",
+                "author": "Unknown",
+                "headline": "",
+                "time_raw": "",
+                "reactions_label": "",
+                "comments_label": "",
+                "reposts_label": "",
+                "author_profile_url": "",
+            }
+        )
+        result = await _extract_post_content_from_page(page)
+
+        assert result["linkedin_username"] is None
+
+    async def test_linkedin_username_from_company(self):
+        page = _make_mock_post_page(
+            data={
+                "text": "Company post",
+                "author": "NVIDIA",
+                "headline": "Tech company",
+                "time_raw": "1 hour ago",
+                "reactions_label": "",
+                "comments_label": "",
+                "reposts_label": "",
+                "author_profile_url": "/company/nvidia",
+            }
+        )
+        result = await _extract_post_content_from_page(page)
+
+        assert result["linkedin_username"] == "nvidia"
+
     async def test_returns_reactions_count(self):
         page = _make_mock_post_page()
         result = await _extract_post_content_from_page(page)
@@ -193,6 +236,7 @@ class TestExtractPostContentFromPage:
         expected_keys = {
             "text",
             "author",
+            "linkedin_username",
             "author_headline",
             "posted_ago",
             "reactions_count",
@@ -235,6 +279,7 @@ class TestExtractPostContentFromPage:
 
         assert result["text"] == ""
         assert result["author"] == ""
+        assert result["linkedin_username"] is None
         assert result["reactions_count"] is None
 
 
@@ -275,6 +320,7 @@ class TestPostContentTool:
         assert "author" in result
         assert "TSMC" in result["text"]
         assert result["author"] == "Gennaro Cuofano"
+        assert result["linkedin_username"] == "gennarocuofano"
         assert result["reactions_count"] == 142
 
     async def test_post_url_returned(self, mock_context, mock_deps):

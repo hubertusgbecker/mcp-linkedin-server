@@ -71,6 +71,7 @@ _POST_CONTENT_JS = r"""() => {
         reactions_label: '',
         comments_label: '',
         reposts_label: '',
+        author_profile_url: '',
     };
 
     // Post text
@@ -112,6 +113,25 @@ _POST_CONTENT_JS = r"""() => {
         if (el && el.innerText.trim()) {
             result.headline = el.innerText.trim();
             break;
+        }
+    }
+
+    // Author profile link (person or company)
+    const actorContainer = document.querySelector('.update-components-actor__container')
+        || document.querySelector('[class*="update-components-actor"]');
+    if (actorContainer) {
+        const personLink = actorContainer.querySelector('a[href*="/in/"]');
+        if (personLink) {
+            const href = personLink.getAttribute('href') || '';
+            const m = href.match(/\/in\/([^/?#]+)/);
+            if (m) result.author_profile_url = '/in/' + decodeURIComponent(m[1]);
+        } else {
+            const companyLink = actorContainer.querySelector('a[href*="/company/"]');
+            if (companyLink) {
+                const href = companyLink.getAttribute('href') || '';
+                const m = href.match(/\/company\/([^/?#]+)/);
+                if (m) result.author_profile_url = '/company/' + decodeURIComponent(m[1]);
+            }
         }
     }
 
@@ -158,6 +178,18 @@ _POST_CONTENT_JS = r"""() => {
 }"""
 
 
+def _parse_username_from_profile_url(url: str) -> Optional[str]:
+    """Extract LinkedIn username from a profile URL fragment.
+
+    Handles /in/<username> and /company/<slug> patterns.
+    Returns None for empty or unrecognised strings.
+    """
+    if not url:
+        return None
+    match = re.match(r"^/(?:in|company)/([^/?#]+)", url)
+    return match.group(1) if match else None
+
+
 async def _extract_post_content_from_page(page: Any) -> Dict[str, Any]:
     """Extract full post content from a LinkedIn post page.
 
@@ -187,6 +219,9 @@ async def _extract_post_content_from_page(page: Any) -> Dict[str, Any]:
     return {
         "text": text,
         "author": author,
+        "linkedin_username": _parse_username_from_profile_url(
+            raw.get("author_profile_url", "")
+        ),
         "author_headline": headline,
         "posted_ago": posted_ago,
         "reactions_count": _parse_engagement_count(raw.get("reactions_label", "")),
@@ -230,6 +265,9 @@ def register_post_content_tools(mcp: FastMCP) -> None:
             - post_url (str): The URL that was scraped
             - text (str): Full post body text (not truncated)
             - author (str): Name of the post author
+            - linkedin_username (str | null): LinkedIn username or company slug extracted
+              from the author profile link (e.g. "gennarocuofano", "nvidia").
+              null when no profile link is found.
             - author_headline (str): Author's LinkedIn headline
             - posted_ago (str): Relative timestamp (e.g. "3 minutes ago", "2 hours ago")
             - reactions_count (int | null): Number of reactions, null if not available
