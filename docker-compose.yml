@@ -7,7 +7,7 @@ services:
     environment:
       - LOG_LEVEL=WARNING
       - PYTHONUNBUFFERED=1
-    command: ["--transport", "sse", "--host", "0.0.0.0", "--port", "8100", "--path", "/sse"]
+    command: ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8100", "--path", "/mcp"]
     ports:
       - "8100:8100"
     restart: unless-stopped

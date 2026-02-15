@@ -10,11 +10,11 @@ Pre-built [n8n](https://n8n.io/) workflow templates that consume the LinkedIn MC
    # Local
    uv run -m mcp_linkedin_server --no-headless --transport streamable-http
 
-   # Docker
+   # Docker (runs on port 8100)
    docker compose up
    ```
 
-   Default endpoint: `http://localhost:8000/mcp`
+   Default endpoint: `http://localhost:8000/mcp` (local) or `http://localhost:8100/mcp` (Docker Compose)
 
 2. **Authenticate** — ensure you have a valid browser profile:
 

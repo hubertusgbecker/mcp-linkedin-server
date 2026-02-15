@@ -48,9 +48,9 @@ uvx mcp-linkedin-server --get-session
 | `LOG_LEVEL` | `WARNING` | Logging level: DEBUG, INFO, WARNING, ERROR |
 | `TIMEOUT` | `5000` | Browser timeout in milliseconds |
 | `USER_AGENT` | - | Custom browser user agent |
-| `TRANSPORT` | `stdio` | Transport mode: stdio, streamable-http |
-| `HOST` | `127.0.0.1` | HTTP server host (for streamable-http transport) |
-| `PORT` | `8000` | HTTP server port (for streamable-http transport) |
+| `TRANSPORT` | `stdio` | Transport mode: stdio, sse, streamable-http |
+| `HOST` | `127.0.0.1` | HTTP server host (for sse/streamable-http transport) |
+| `PORT` | `8000` | HTTP server port (for sse/streamable-http transport) |
 | `HTTP_PATH` | `/mcp` | HTTP server path (for streamable-http transport) |
 | `SLOW_MO` | `0` | Delay between browser actions in ms (debugging) |
 | `VIEWPORT` | `1280x720` | Browser viewport size as WIDTHxHEIGHT |
