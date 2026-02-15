@@ -1,0 +1,120 @@
+{
+  "name": "LinkedIn MCP - Get Notifications",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "param-limit",
+              "name": "limit",
+              "value": 10,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-params-1",
+      "name": "Set Limit",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/mcp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'get_notifications', arguments: { limit: $json.limit } } }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "http-1",
+      "name": "Call MCP - Get Notifications",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "parse-result",
+              "name": "notifications_data",
+              "value": "={{ JSON.parse($json.result.content[0].text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-1",
+      "name": "Parse Notifications",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "notifications_data.notifications",
+        "options": {}
+      },
+      "id": "split-1",
+      "name": "Split Notifications",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1080, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Set Limit", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set Limit": {
+      "main": [
+        [{ "node": "Call MCP - Get Notifications", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call MCP - Get Notifications": {
+      "main": [
+        [{ "node": "Parse Notifications", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Notifications": {
+      "main": [
+        [{ "node": "Split Notifications", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "LinkedIn" },
+    { "name": "MCP" }
+  ],
+  "pinData": {}
+}

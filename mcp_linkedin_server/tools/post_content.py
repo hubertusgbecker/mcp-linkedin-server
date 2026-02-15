@@ -19,6 +19,7 @@ from mcp_linkedin_server.drivers.browser import (
     get_or_create_browser,
 )
 from mcp_linkedin_server.error_handler import handle_tool_error
+from mcp_linkedin_server.utils.validation import validate_post_url
 
 logger = logging.getLogger(__name__)
 
@@ -275,6 +276,9 @@ def register_post_content_tools(mcp: FastMCP) -> None:
             - reposts_count (int | null): Number of reposts, null if not available
         """
         try:
+            # Validate input
+            post_url = validate_post_url(post_url)
+
             await ensure_authenticated()
 
             logger.info(f"Scraping post content: {post_url}")

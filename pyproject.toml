@@ -5,7 +5,8 @@ description = "MCP server for LinkedIn profile, company, and job scraping with C
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [
-    { name = "Daniel Sticker", email = "daniel@sticker.name" }
+    { name = "Daniel Sticker", email = "daniel@sticker.name" },
+    { name = "Dr. Hubertus Becker" }
 ]
 license = "Apache-2.0"
 keywords = [

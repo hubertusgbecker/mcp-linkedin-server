@@ -54,7 +54,13 @@ def convert_exception_to_response(
     Returns:
         Structured error response dictionary
     """
-    if isinstance(exception, CredentialsNotFoundError):
+    if isinstance(exception, ValueError):
+        return {
+            "error": "invalid_input",
+            "message": str(exception),
+        }
+
+    elif isinstance(exception, CredentialsNotFoundError):
         return {
             "error": "authentication_not_found",
             "message": str(exception),

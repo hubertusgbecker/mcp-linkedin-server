@@ -1,0 +1,104 @@
+{
+  "name": "LinkedIn MCP - Get Company Profile",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "param-company",
+              "name": "company_name",
+              "value": "anthropic",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-params-1",
+      "name": "Set Company Slug",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/mcp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'get_company_profile', arguments: { company_name: $json.company_name } } }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "http-1",
+      "name": "Call MCP - Get Company Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "parse-result",
+              "name": "company",
+              "value": "={{ JSON.parse($json.result.content[0].text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-1",
+      "name": "Parse Company Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [860, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Set Company Slug", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set Company Slug": {
+      "main": [
+        [{ "node": "Call MCP - Get Company Profile", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call MCP - Get Company Profile": {
+      "main": [
+        [{ "node": "Parse Company Result", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "LinkedIn" },
+    { "name": "MCP" }
+  ],
+  "pinData": {}
+}

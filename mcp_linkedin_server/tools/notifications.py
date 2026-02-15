@@ -18,6 +18,7 @@ from mcp_linkedin_server.drivers.browser import (
     get_or_create_browser,
 )
 from mcp_linkedin_server.error_handler import handle_tool_error
+from mcp_linkedin_server.utils.validation import validate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -453,8 +454,8 @@ def register_notification_tools(mcp: FastMCP) -> None:
                 - is_unread (bool): Whether the notification was marked as unread
             - count (int): Number of notifications returned
         """
-        # Clamp limit
-        limit = max(1, min(limit, 50))
+        # Validate and clamp limit
+        limit = validate_limit(limit, max_val=50)
 
         try:
             await ensure_authenticated()

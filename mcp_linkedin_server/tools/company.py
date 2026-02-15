@@ -18,6 +18,7 @@ from mcp_linkedin_server.drivers.browser import (
     get_or_create_browser,
 )
 from mcp_linkedin_server.error_handler import handle_tool_error
+from mcp_linkedin_server.utils.validation import validate_company_slug, validate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,9 @@ def register_company_tools(mcp: FastMCP) -> None:
               and linkedin_url
         """
         try:
+            # Validate input
+            company_name = validate_company_slug(company_name)
+
             # Validate session before scraping
             await ensure_authenticated()
 
@@ -132,6 +136,10 @@ def register_company_tools(mcp: FastMCP) -> None:
                 - article_url (str | null): URL of a linked article if present
         """
         try:
+            # Validate input
+            company_name = validate_company_slug(company_name)
+            limit = validate_limit(limit, max_val=50)
+
             # Validate session before scraping
             await ensure_authenticated()
 

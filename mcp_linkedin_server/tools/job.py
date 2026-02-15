@@ -18,6 +18,12 @@ from mcp_linkedin_server.drivers.browser import (
     get_or_create_browser,
 )
 from mcp_linkedin_server.error_handler import handle_tool_error
+from mcp_linkedin_server.utils.validation import (
+    validate_job_id,
+    validate_limit,
+    validate_location,
+    validate_search_keywords,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +74,9 @@ def register_job_tools(mcp: FastMCP) -> None:
             - benefits (list): Listed job benefits if available
         """
         try:
+            # Validate input
+            job_id = validate_job_id(job_id)
+
             # Validate session before scraping
             await ensure_authenticated()
 
@@ -125,6 +134,11 @@ def register_job_tools(mcp: FastMCP) -> None:
             - count (int): Number of job URLs returned.
         """
         try:
+            # Validate input
+            keywords = validate_search_keywords(keywords)
+            location = validate_location(location)
+            limit = validate_limit(limit, max_val=100)
+
             # Validate session before scraping
             await ensure_authenticated()
 

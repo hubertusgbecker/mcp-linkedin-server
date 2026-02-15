@@ -1,0 +1,215 @@
+{
+  "name": "LinkedIn MCP - Search Jobs Then Get Details",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "param-keywords",
+              "name": "keywords",
+              "value": "machine learning engineer",
+              "type": "string"
+            },
+            {
+              "id": "param-location",
+              "name": "location",
+              "value": "Remote",
+              "type": "string"
+            },
+            {
+              "id": "param-limit",
+              "name": "limit",
+              "value": 5,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-params-1",
+      "name": "Set Search Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/mcp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_jobs', arguments: { keywords: $json.keywords, location: $json.location, limit: $json.limit } } }) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "http-search",
+      "name": "Search Jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "parse-search",
+              "name": "search_results",
+              "value": "={{ JSON.parse($json.result.content[0].text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-search",
+      "name": "Parse Search Results",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "search_results.job_urls",
+        "options": {}
+      },
+      "id": "split-urls",
+      "name": "Split Job URLs",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-id",
+              "name": "job_id",
+              "value": "={{ $json.search_results.job_urls.toString().match(/view\\/(\\d+)/)?.[1] || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "extract-id",
+      "name": "Extract Job ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1300, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/mcp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'get_job_details', arguments: { job_id: $json.job_id } } }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "http-details",
+      "name": "Get Job Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1520, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "parse-job",
+              "name": "job",
+              "value": "={{ JSON.parse($json.result.content[0].text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-job",
+      "name": "Parse Job Details",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1740, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Set Search Parameters", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set Search Parameters": {
+      "main": [
+        [{ "node": "Search Jobs", "type": "main", "index": 0 }]
+      ]
+    },
+    "Search Jobs": {
+      "main": [
+        [{ "node": "Parse Search Results", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Search Results": {
+      "main": [
+        [{ "node": "Split Job URLs", "type": "main", "index": 0 }]
+      ]
+    },
+    "Split Job URLs": {
+      "main": [
+        [{ "node": "Extract Job ID", "type": "main", "index": 0 }]
+      ]
+    },
+    "Extract Job ID": {
+      "main": [
+        [{ "node": "Get Job Details", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Job Details": {
+      "main": [
+        [{ "node": "Parse Job Details", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "LinkedIn" },
+    { "name": "MCP" },
+    { "name": "Jobs" },
+    { "name": "Pipeline" }
+  ],
+  "pinData": {}
+}

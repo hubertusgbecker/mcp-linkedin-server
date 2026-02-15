@@ -22,6 +22,7 @@ from mcp_linkedin_server.drivers.browser import (
     get_or_create_browser,
 )
 from mcp_linkedin_server.error_handler import handle_tool_error
+from mcp_linkedin_server.utils.validation import validate_linkedin_username
 
 logger = logging.getLogger(__name__)
 
@@ -396,6 +397,9 @@ def register_person_tools(mcp: FastMCP) -> None:
               address), value, and optional label.
         """
         try:
+            # Validate input
+            linkedin_username = validate_linkedin_username(linkedin_username)
+
             # Validate session before scraping
             await ensure_authenticated()
 

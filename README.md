@@ -1,6 +1,6 @@
 # MCP LinkedIn Server
 
-An improved fork of [stickerdaniel/linkedin-mcp-server](https://github.com/stickerdaniel/linkedin-mcp-server). This fork adds **4 new tools**, totaling **10 MCP tools** for comprehensive LinkedIn automation — from profile research and job discovery to real-time notifications, full post extraction, and profile analytics.
+An improved fork of [stickerdaniel/linkedin-mcp-server](https://github.com/stickerdaniel/linkedin-mcp-server). This fork adds **4 new tools**, totaling **9 MCP tools** for comprehensive LinkedIn automation — from profile research and job discovery to real-time notifications, full post extraction, and profile analytics.
 
 <p align="left">
   <a href="https://github.com/hubertusgbecker/mcp-linkedin-server" target="_blank"><img src="https://img.shields.io/badge/repo-hubertusgbecker%2Fmcp--linkedin--server-blue" alt="GitHub"></a>
@@ -42,16 +42,6 @@ Get a company's full LinkedIn profile by its URL slug. Scrapes the "About" page 
 
 **Returns:** company name, about section, website, phone, headquarters, founded year, industry, company type, size, specialties, headcount, showcase pages, affiliated companies, and featured employees with their LinkedIn URLs.
 
-#### `get_company_posts`
-
-Get recent posts from a company's LinkedIn feed with engagement metrics and media.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `company_name` | `str` | URL slug after `linkedin.com/company/` (e.g. `"anthropic"`) |
-
-**Returns:** list of posts with text content, posted time, reactions count, comments count, reposts count, and image URLs.
-
 ### Jobs (upstream)
 
 #### `search_jobs`
@@ -76,7 +66,17 @@ Get full details of a specific LinkedIn job posting including the complete descr
 
 **Returns:** title, company, location, posted date, applicant count, full job description, seniority level, employment type, job function, industries, direct LinkedIn URL, and benefits.
 
-### Notifications & Posts (fork)
+### Notifications, Posts & Analytics (fork)
+
+#### `get_company_posts`
+
+Get recent posts from a company's LinkedIn feed with engagement metrics and media.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_name` | `str` | URL slug after `linkedin.com/company/` (e.g. `"anthropic"`) |
+
+**Returns:** list of posts with text content, posted time, reactions count, comments count, reposts count, and image URLs.
 
 #### `get_notifications`
 
@@ -159,6 +159,7 @@ uvx mcp-linkedin-server
 **Transport modes:**
 
 - **Default (stdio)** -- Standard communication for local MCP servers
+- **SSE** -- Server-Sent Events for streaming MCP clients
 - **Streamable HTTP** -- For web-based MCP server
 
 **CLI options:**
@@ -166,7 +167,7 @@ uvx mcp-linkedin-server
 - `--get-session` -- Open browser to log in and save persistent profile
 - `--no-headless` -- Show browser window (useful for debugging)
 - `--log-level {DEBUG,INFO,WARNING,ERROR}` -- Set logging level (default: WARNING)
-- `--transport {stdio,streamable-http}` -- Set transport mode
+- `--transport {stdio,sse,streamable-http}` -- Set transport mode
 - `--host HOST` -- HTTP server host (default: 127.0.0.1)
 - `--port PORT` -- HTTP server port (default: 8000)
 - `--path PATH` -- HTTP server path (default: /mcp)
@@ -255,7 +256,7 @@ uvx mcp-linkedin-server --get-session
 **CLI options (Docker):**
 
 - `--log-level {DEBUG,INFO,WARNING,ERROR}` -- Set logging level (default: WARNING)
-- `--transport {stdio,streamable-http}` -- Set transport mode
+- `--transport {stdio,sse,streamable-http}` -- Set transport mode
 - `--host HOST` -- HTTP server host (default: 127.0.0.1)
 - `--port PORT` -- HTTP server port (default: 8000)
 - `--path PATH` -- HTTP server path (default: /mcp)
@@ -372,7 +373,7 @@ uv run -m mcp_linkedin_server
 - `--get-session` -- Open browser to log in and save persistent profile
 - `--no-headless` -- Show browser window (useful for debugging)
 - `--log-level {DEBUG,INFO,WARNING,ERROR}` -- Set logging level (default: WARNING)
-- `--transport {stdio,streamable-http}` -- Set transport mode
+- `--transport {stdio,sse,streamable-http}` -- Set transport mode
 - `--host HOST` -- HTTP server host (default: 127.0.0.1)
 - `--port PORT` -- HTTP server port (default: 8000)
 - `--path PATH` -- HTTP server path (default: /mcp)
@@ -446,6 +447,29 @@ uv run -m mcp_linkedin_server --transport streamable-http --host 127.0.0.1 --por
 - Environment variable alternative: `CHROME_PATH=/path/to/chrome`
 
 </details>
+
+---
+
+## n8n Workflows
+
+Pre-built [n8n](https://n8n.io/) workflow templates are included in the `n8n-workflows/` directory. Each workflow calls the MCP server via JSON-RPC over HTTP.
+
+**Prerequisites:** Start the server in HTTP mode:
+
+```bash
+uvx mcp-linkedin-server --transport streamable-http
+```
+
+**Single-tool workflows** — one for each MCP tool (person profile, company profile, company posts, job search, job details, notifications, post content, profile analytics, close session).
+
+**Pipeline workflows** — chain multiple tools:
+
+- **Search → Details** (`search_jobs_then_get_details.json`) — search jobs by keyword, then fetch full details for each result
+- **Notifications → Posts** (`notifications_then_post_content.json`) — get notifications, filter those with post URLs, fetch each post's full content
+
+**Import:** Open n8n → Workflows → Import from file → select any `.json` from the `n8n-workflows/` directory. Update the HTTP Request node URL if your server is not at `http://localhost:8000/mcp`.
+
+See [`n8n-workflows/README.md`](n8n-workflows/README.md) for full documentation.
 
 ---
 

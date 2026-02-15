@@ -1,0 +1,105 @@
+{
+  "name": "LinkedIn MCP - Get Job Details",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "param-job-id",
+              "name": "job_id",
+              "value": "4252026496",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-params-1",
+      "name": "Set Job ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/mcp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'get_job_details', arguments: { job_id: $json.job_id } } }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "http-1",
+      "name": "Call MCP - Get Job Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "parse-result",
+              "name": "job",
+              "value": "={{ JSON.parse($json.result.content[0].text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-1",
+      "name": "Parse Job Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [860, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Set Job ID", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set Job ID": {
+      "main": [
+        [{ "node": "Call MCP - Get Job Details", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call MCP - Get Job Details": {
+      "main": [
+        [{ "node": "Parse Job Result", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "LinkedIn" },
+    { "name": "MCP" },
+    { "name": "Jobs" }
+  ],
+  "pinData": {}
+}

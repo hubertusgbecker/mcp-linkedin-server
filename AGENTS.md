@@ -53,20 +53,23 @@ mcp_linkedin_server/
 ├── exceptions.py        # Custom exception hierarchy
 ├── logging_config.py    # Structured logging configuration
 ├── config/
+│   ├── __init__.py      # Singleton config pattern, exports get_config/reset_config
 │   ├── loaders.py       # Layered config loading (CLI → env → defaults)
-│   ├── schema.py        # Config dataclasses and validation
-│   ├── providers.py     # Configuration provider abstraction
-│   ├── secrets.py       # Secure credential handling
-│   └── messages.py      # User-facing message constants
+│   └── schema.py        # Config dataclasses and validation
+├── callbacks.py         # MCP callback hooks (ProgressCallback for linkedin_scraper)
 ├── drivers/
+│   ├── __init__.py      # Driver exports
 │   └── browser.py       # Patchright browser lifecycle (singleton)
-└── tools/
-    ├── person.py        # get_person_profile
-    ├── company.py       # get_company_profile, get_company_posts
-    ├── job.py           # get_job_details, search_jobs
-    ├── notifications.py # get_notifications
-    ├── post_content.py  # get_post_content
-    └── analytics.py     # get_recommended_jobs, close_session
+├── tools/
+│   ├── person.py        # get_person_profile
+│   ├── company.py       # get_company_profile, get_company_posts
+│   ├── job.py           # get_job_details, search_jobs
+│   ├── notifications.py # get_notifications
+│   ├── post_content.py  # get_post_content
+│   └── analytics.py     # get_profile_analytics
+├── utils/
+│   └── validation.py    # Input validation utilities
+n8n-workflows/               # Pre-built n8n workflow templates (JSON-RPC)
 ```
 
 ### Startup Sequence
@@ -78,12 +81,13 @@ mcp_linkedin_server/
 ### Transport Modes
 
 - **stdio** (default) — Standard I/O for local MCP clients (Claude Desktop, etc.)
+- **sse** — Server-Sent Events for streaming MCP clients
 - **streamable-http** — HTTP server for web-based MCP clients
 
 ### Key Patterns
 
 - **Singleton browser** — One Patchright browser instance shared across all tool invocations
-- **Lazy initialization** — Browser launches on first tool call (unless `--no-lazy-init`)
+- **Lazy initialization** — Browser launches on first tool call
 - **Persistent profile** — Browser state survives restarts via `~/.linkedin-mcp/profile/`
 - **Lifespan management** — FastMCP lifespan context handles browser setup/teardown
 
@@ -100,8 +104,65 @@ mcp_linkedin_server/
 | `search_jobs` | `tools/job.py` | Search jobs by keywords and location |
 | `get_notifications` | `tools/notifications.py` | Notification feed with author usernames, actions, post URLs |
 | `get_post_content` | `tools/post_content.py` | Full post text, author, headline, engagement metrics |
-| `get_recommended_jobs` | `tools/analytics.py` | Recommended jobs from LinkedIn feed |
-| `close_session` | `tools/analytics.py` | Close browser session and clean up resources |
+| `get_profile_analytics` | `tools/analytics.py` | Profile views, post impressions, search appearances |
+| `close_session` | `server.py` | Close browser session and clean up resources |
+
+---
+
+## API Protocol
+
+The server exposes tools via **JSON-RPC** over the Model Context Protocol. API consumers send POST requests to the MCP endpoint and receive structured JSON responses.
+
+**Request format:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_person_profile",
+    "arguments": { "linkedin_username": "satyanadella" }
+  }
+}
+```
+
+**Response format:** The tool result is returned in `result.content[0].text` as a JSON string.
+
+| Transport | URL | Protocol |
+|---|---|---|
+| stdio (default) | — | Standard I/O for local MCP clients |
+| sse | `http://{host}:{port}/sse` | Server-Sent Events |
+| streamable-http | `http://{host}:{port}{path}` (default: `http://127.0.0.1:8000/mcp`) | HTTP POST |
+
+---
+
+## n8n Workflows
+
+Pre-built [n8n](https://n8n.io/) workflow templates in `n8n-workflows/` consume the MCP API via JSON-RPC HTTP requests.
+
+**Single-tool workflows** (one per MCP tool):
+
+| Workflow | File |
+|---|---|
+| Get Person Profile | `get_person_profile.json` |
+| Get Company Profile | `get_company_profile.json` |
+| Get Company Posts | `get_company_posts.json` |
+| Search Jobs | `search_jobs.json` |
+| Get Job Details | `get_job_details.json` |
+| Get Notifications | `get_notifications.json` |
+| Get Post Content | `get_post_content.json` |
+| Get Profile Analytics | `get_profile_analytics.json` |
+| Close Session | `close_session.json` |
+
+**Pipeline workflows** (chained tools):
+
+| Workflow | File |
+|---|---|
+| Search → Details | `search_jobs_then_get_details.json` |
+| Notifications → Posts | `notifications_then_post_content.json` |
+
+**Usage:** Start the server in HTTP mode (`--transport streamable-http`), import a workflow JSON into n8n, and run. See `n8n-workflows/README.md` for details.
 
 ---
 
@@ -123,7 +184,7 @@ mcp_linkedin_server/
 ## Testing
 
 - **Framework:** pytest with `pytest-asyncio` (mode: `auto`)
-- **Test directory:** `tests/` — 14 test modules, 175+ tests
+- **Test directory:** `tests/` — 18 test modules, 445+ tests
 - **Parallelism:** `pytest-xdist` available (`-n auto`)
 
 ```bash
@@ -202,17 +263,20 @@ type(scope): subject
 | Flag | Description | Default |
 |---|---|---|
 | `--get-session` | Open browser to create persistent profile | — |
+| `--session-info` | Check if current session is valid and exit | — |
+| `--clear-session` | Delete stored browser profile | — |
 | `--no-headless` | Show browser window | headless |
-| `--no-lazy-init` | Initialize browser immediately on startup | lazy |
 | `--log-level` | `DEBUG` / `INFO` / `WARNING` / `ERROR` | `WARNING` |
-| `--transport` | `stdio` / `streamable-http` | `stdio` |
+| `--transport` | `stdio` / `sse` / `streamable-http` | `stdio` |
 | `--host` | HTTP server host | `127.0.0.1` |
 | `--port` | HTTP server port | `8000` |
 | `--path` | HTTP server path | `/mcp` |
 | `--timeout` | Browser page timeout (ms) | `5000` |
 | `--user-data-dir` | Browser profile directory | `~/.linkedin-mcp/profile` |
 | `--chrome-path` | Chrome/Chromium executable path | auto-detect |
-| `--clear-session` | Delete stored browser profile | — |
+| `--slow-mo` | Delay between browser actions (ms) | `0` |
+| `--user-agent` | Custom browser user agent | auto |
+| `--viewport` | Browser viewport size (WxH) | `1280x720` |
 
 ### Environment Variables
 
