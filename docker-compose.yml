@@ -11,6 +11,12 @@ services:
     command: ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8100", "--path", "/mcp"]
     ports:
       - "8100:8100"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/mcp')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     restart: unless-stopped
 
 volumes:

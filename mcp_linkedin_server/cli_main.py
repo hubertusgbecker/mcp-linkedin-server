@@ -263,28 +263,47 @@ def main() -> None:
     logger.debug(f"Server configuration: {config}")
 
     # Phase 1: Ensure Authentication is Ready
+    # In HTTP transport modes, skip hard auth check so the server starts
+    # even without a profile. Tools will return structured errors on call.
+    # This prevents restart loops on NAS/Docker when the volume is empty.
+    transport = config.server.transport
+    http_mode = transport in ("sse", "streamable-http")
+
     try:
         ensure_authentication_ready()
         print("✅ Authentication ready")
         logger.info("Authentication ready")
 
     except CredentialsNotFoundError as e:
-        logger.error(f"Authentication setup failed: {e}")
-        if config.is_interactive:
-            print("\n❌ Authentication required")
-            print(str(e))
+        if http_mode:
+            logger.warning(f"No authentication found, starting server anyway: {e}")
+            print("⚠️  No browser profile found — server will start without auth")
+            print("   Tools will return errors until a profile is provided.")
+            print("   Copy a profile into the container with:")
+            print(
+                "     docker cp ~/.linkedin-mcp/. mcp-linkedin-server:/home/pwuser/.linkedin-mcp/"
+            )
         else:
-            print("\n❌ Authentication required for non-interactive mode")
-        sys.exit(1)
+            logger.error(f"Authentication setup failed: {e}")
+            if config.is_interactive:
+                print("\n❌ Authentication required")
+                print(str(e))
+            else:
+                print("\n❌ Authentication required for non-interactive mode")
+            sys.exit(1)
 
     except KeyboardInterrupt:
         print("\n\n👋 Setup cancelled by user")
         sys.exit(0)
 
     except (AuthenticationError, RateLimitError) as e:
-        logger.error(f"LinkedIn error during setup: {e}")
-        print(f"\n❌ {str(e)}")
-        sys.exit(1)
+        if http_mode:
+            logger.warning(f"Auth issue, starting server anyway: {e}")
+            print(f"⚠️  {str(e)} — server will start, tools may fail")
+        else:
+            logger.error(f"LinkedIn error during setup: {e}")
+            print(f"\n❌ {str(e)}")
+            sys.exit(1)
 
     except Exception as e:
         logger.error(f"Unexpected error during authentication setup: {e}")
@@ -293,8 +312,6 @@ def main() -> None:
 
     # Phase 2: Server Runtime
     try:
-        transport = config.server.transport
-
         # Prompt for transport in interactive mode if not explicitly set
         if config.is_interactive and not config.server.transport_explicitly_set:
             print("\n🚀 Server ready! Choose transport mode:")

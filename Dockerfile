@@ -32,6 +32,7 @@ RUN chown -R pwuser:pwuser /app
 
 # Switch to non-root user
 USER pwuser
+ENV HOME=/home/pwuser
 
 # Set entrypoint and default arguments
 ENTRYPOINT ["uv", "run", "-m", "mcp_linkedin_server"]
