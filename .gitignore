@@ -208,3 +208,7 @@ repomix-output.xml
 
 # Script run outputs
 scripts/output/
+
+# Docker bind-mount data (browser profile, session data)
+data/*
+!data/.gitkeep
