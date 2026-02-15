@@ -1,6 +1,7 @@
 services:
   linkedin-mcp:
     image: hubertusgbecker/mcp-linkedin-server:latest
+    container_name: mcp-linkedin-server
     build: .
     volumes:
       - ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp
