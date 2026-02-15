@@ -14,6 +14,7 @@
 | Run server (local) | `uv run -m mcp_linkedin_server --no-headless` |
 | Run via uvx (PyPI) | `uvx mcp-linkedin-server` |
 | Run in Docker | `docker run -it --rm -v ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp hubertusgbecker/mcp-linkedin-server:latest` |
+| Run via Compose | `docker compose up -d` (NAS/server deployments, uses named volume) |
 | Lint | `uv run ruff check .` (auto-fix: `--fix`) |
 | Format | `uv run ruff format .` |
 | Type check | `uv run ty check` |

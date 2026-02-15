@@ -277,6 +277,16 @@ docker run -it --rm \
   --transport streamable-http --host 0.0.0.0 --port 8080 --path /mcp
 ```
 
+**Docker Compose (NAS / server deployments):**
+
+For Synology, QNAP, or other NAS/server environments, use `docker compose` instead of `docker run`. The included `docker-compose.yml` uses a named volume (avoids `~` expansion issues on systems without `HOME`):
+
+```bash
+docker compose up -d
+```
+
+Endpoint: `http://<host-ip>:8100/mcp`
+
 </details>
 
 <details>
@@ -285,6 +295,7 @@ docker run -it --rm \
 **Docker issues:**
 
 - Make sure Docker is installed and running: `docker ps`
+- On NAS systems (Synology, QNAP), use `docker compose` instead of `docker run` — the `~` shortcut may not expand correctly without a `HOME` environment variable
 
 **Login issues:**
 

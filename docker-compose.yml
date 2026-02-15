@@ -4,7 +4,7 @@ services:
     container_name: mcp-linkedin-server
     build: .
     volumes:
-      - ~/.linkedin-mcp:/home/pwuser/.linkedin-mcp
+      - linkedin-mcp-data:/home/pwuser/.linkedin-mcp
     environment:
       - LOG_LEVEL=WARNING
       - PYTHONUNBUFFERED=1
@@ -12,3 +12,6 @@ services:
     ports:
       - "8100:8100"
     restart: unless-stopped
+
+volumes:
+  linkedin-mcp-data:

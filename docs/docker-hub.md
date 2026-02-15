@@ -40,6 +40,16 @@ uvx mcp-linkedin-server --get-session
 
 > **Note:** Docker containers don't have a display server, so you can't use the `--get-session` command in Docker. Create a profile on your host first.
 
+**Docker Compose (NAS / server deployments):**
+
+For Synology, QNAP, or other NAS/server environments, use the included `docker-compose.yml` which uses a named volume (avoids `~` expansion issues on headless systems without `HOME`):
+
+```bash
+docker compose up -d
+```
+
+Endpoint: `http://<host-ip>:8100/mcp`
+
 ## Environment Variables
 
 | Variable | Default | Description |
